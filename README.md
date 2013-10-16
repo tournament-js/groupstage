@@ -1,4 +1,6 @@
 # GroupStage
+[![Build Status](https://secure.travis-ci.org/clux/groupstage.png)](http://travis-ci.org/clux/groupstage)
+[![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage
 
     Stability: 3 - Stable
 
@@ -21,7 +23,7 @@ var gs1 = new GroupStage(16, 4);
 var gs2 = new GroupStage(9, 3);
 ```
 
-The `GroupStage.invalid(numPlayers, groupSize)` will tell you whether the constructor arguments produce a valid tournament. Read its entry in the [tournament commonalities doc](./base.md#ensuring-constructibility) for info on this.
+The `GroupStage.invalid(numPlayers, groupSize)` will tell you whether the constructor arguments produce a valid tournament. Read its entry in the [tournament commonalities doc](https://github.com/clux/tournament/blob/master/doc/base.md#ensuring-constructibility) for info on this.
 
 ## Match ids
 Like all tournament types, matches have an `id` object that contains three values all in `{1, 2, ...}`:
@@ -35,7 +37,7 @@ Like all tournament types, matches have an `id` object that contains three value
 ```
 
 ## Finding matches
-All the normal [Base class helper methods](./base.md#common-methods) exist on a `GroupStage` instance.
+All the normal [Base class helper methods](https://github.com/clux/tournament/blob/master/doc/base.md#common-methods) exist on a `GroupStage` instance.
 Some notable examples follow:
 
 ```js
@@ -47,7 +49,7 @@ var matchesForSeed1 = gs.matchesFor(1);
 
 ## Scoring matches
 Call `gs.score(id, [player0Score, player1Score])` as for every match played.
-The `gs.unscorable(id, scoreArray)` will tell you whether the score is valid. Read the entry in the [tournament commonalities doc](./base.md#ensuring-scorability--consistency).
+The `gs.unscorable(id, scoreArray)` will tell you whether the score is valid. Read the entry in the [tournament commonalities doc](https://github.com/clux/tournament/blob/master/doc/base.md#ensuring-scorability--consistency).
 
 ### NB: Few restrictions
 Unlike any other tournament, `GroupStages` allow for individual match ties. The results are simply tallied up by points (configurable) at the end. If match ties is not possible/ideal, just check for it externally:
