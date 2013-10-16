@@ -362,31 +362,22 @@ TieBreaker.prototype.unscorable = function (id, score, allowPast) {
 };
 
 TieBreaker.prototype.score = function (id, scs) {
-  // 0. error handling - if this fails client didnt guard so we log
-  var invReason = this.unscorable(id, scs, true);
-  if (invReason !== null) {
-    console.error("failed scoring TieBreaker match %s with %j", idString(id), scs);
-    console.error("reason:", invReason);
-    return false;
-  }
-
-  var m = this.findMatch(id);
-  m.m = scs; // only map scores are relevant for progression
-
-  // if id.r === 1, we need to do some analysis to get who's in R2 (if it exists)
-  // TODO: could use Base helpers here?
-  var last = this.matches[this.matches.length-1];
-  if (id.r === 1 && last.id.r === 2) {
-    var r1 = this.matches.slice(0, -1); // only one match in R2
-    if (r1.every($.get('m'))) {
-      var numGroups = this.posAry.length;
-      var perGroup = Math.floor(this.limit / numGroups);
-      var posAry2 = posByGroup2(this.posAry, r1);
-      var r2ps = generateR2(posAry2, numGroups, perGroup);
-      last.p = r2ps;
+  if (Base.prototype.score.call(this, id, scs)) {
+    // if id.r === 1, we need to do some analysis to get who's in R2 (if it exists)
+    var last = this.matches[this.matches.length-1];
+    if (id.r === 1 && last.id.r === 2) {
+      var r1 = this.matches.slice(0, -1); // only one match in R2
+      if (r1.every($.get('m'))) {
+        var numGroups = this.posAry.length;
+        var perGroup = Math.floor(this.limit / numGroups);
+        var posAry2 = posByGroup2(this.posAry, r1);
+        var r2ps = generateR2(posAry2, numGroups, perGroup);
+        last.p = r2ps;
+      }
     }
+    return true;
   }
-  return true;
+  return false;
 };
 
 TieBreaker.prototype.results = function () {
