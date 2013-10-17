@@ -167,7 +167,7 @@ var posByGroup2 = function (posAry, r1) {
     }
 
     // get seeds in order of map scores (know scores are untied so sort fine)
-    var zip = $.zip(m.p, m.m).sort(Base.compareZip).map($.get(0));
+    var sorted = Base.sorted(m);
 
     // create a modified entry at index i
     res[i] = $.replicate(posG.length, []);
@@ -178,7 +178,7 @@ var posByGroup2 = function (posAry, r1) {
       if (m.p.indexOf(p[0]) >= 0) {
         // this is the cluster that was tied - now unbroken
         for (var j = 0; j < p.length; j += 1) {
-          res[i][k + j] = [zip[j]]; // pos k+j is the player that scored jth in m
+          res[i][k + j] = [sorted[j]]; // pos k+j is the player that scored jth in m
         }
         k += p.length;
       }
@@ -231,22 +231,14 @@ var results = function (ms, posAry, oldRes, mapsBreak) {
   //var rem = limit % numGroups;
 
   // r1 matches determine gpos for the tied cluster at limit border
-  var r1gposAdjust = function () {
-    for (var i = 0; i < ms.length; i += 1) {
-      var m = ms[i];
-      if (m.id.r !== 1) {
-        continue;
-      }
-      var top = $.zip(m.p, m.m).sort(Base.compareZip).map($.get(0));
-      for (var j = 0; j < top.length; j += 1) {
-        var p = top[j];
-        var resEl = getEntry(p);
-        var playersAbove = getPlayersAbove(i+1, resEl.gpos);
-        resEl.gpos = j + playersAbove + 1;
-      }
-    }
-  };
-  r1gposAdjust();
+  ms.filter(function (m) {
+    return m.id.r === 1;
+  }).forEach(function (m) {
+    Base.sorted(m).forEach(function (p, j) {
+      var resEl = getEntry(p);
+      resEl.gpos = j + getPlayersAbove(m.id.m, resEl.gpos) + 1;
+    });
+  });
 
 
   // get a partial posAry2 - and replicate GroupStage results bit to be fair
@@ -297,26 +289,18 @@ var results = function (ms, posAry, oldRes, mapsBreak) {
   // change .pos of the players in the R2 match if exists and played
   // TODO: bug here atm: if xarys reduction have already positioned these
   // as one better than the other, then the shift will fuck it up!
-  var m2posAdjust = function () {
-    if (hasR2 && last.m) {
-      var top = $.zip(last.p, last.m).sort(Base.compareZip).map($.get(0));
-      for (var j = 0; j < top.length; j += 1) {
-        var p = top[j];
-        var resEl = getEntry(p);
-        // top were all tied a same x-placement, so when scoring, anything but 1st
-        // is a linear increase in pos (and this does not affect lower clusters)
-        resEl.pos += j;
-      }
-    }
-  };
-  m2posAdjust();
+  if (hasR2 && last.m) {
+    Base.sorted(last).forEach(function (p, i) {
+      // top were all tied a same x-placement, so when scoring, anything but 1st
+      // is a linear increase in pos (and this does not affect lower clusters)
+      getEntry(p).pos += i;
+    });
+  }
 
   // quick way of doing the sort for r2:
   // not necessary to do the full xarys reduce again because we only changed a very
   // specific subset of the xary - so all `pos` values are correct!
-  res.sort($.comparing('pos', +1, 'pts', -1, 'maps', -1, 'seed', +1));
-
-  return res;
+  return res.sort($.comparing('pos', +1, 'pts', -1, 'maps', -1, 'seed', +1));
 };
 
 // needs final gsResults
