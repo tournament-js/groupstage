@@ -2,35 +2,7 @@ var $ = require('interlude')
   , Base = require('tournament')
   , algs = require('./balancer');
 
-var idString = function (id) {
-  return "G" + id.s + " R" + id.r + " M" + id.m;
-};
-
-var invalid = function (np, gs) {
-  if (!Number.isFinite(np) || Math.ceil(np) !== np ||
-      !Number.isFinite(gs) || Math.ceil(gs) !== gs) {
-    return "numPlayers and groupSize must be finite integers";
-  }
-  if (np < 3) {
-    return "GroupStage needs at least 3 players";
-  }
-  if (gs < 3) {
-    return "GroupStage needs a group size greater than or equal 3";
-  }
-  if (gs > np) {
-    return "cannot create GroupStage with groupSize > numPlayers";
-  }
-  return null;
-};
-
 var groupStage = function (numPlayers, groupSize) {
-  var invReason = invalid(numPlayers, groupSize);
-  if (invReason !== null) {
-    console.error("invalid GroupStage configuration: %dp in groups of %d"
-      , numPlayers, groupSize);
-    console.error("reason: ", invReason);
-    return [];
-  }
   var ms = algs.groups(numPlayers, groupSize);
 
   var matches = [];
@@ -49,23 +21,36 @@ var groupStage = function (numPlayers, groupSize) {
   return matches.sort(Base.compareMatches);
 };
 
-// abstraction
-function GroupStage(numPlayers, groupSize) {
-  if (!(this instanceof GroupStage)) {
-    return new GroupStage(numPlayers, groupSize);
+var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize'], {
+  init: function (initParent) {
+    this.version = 1;
+    var ms = groupStage(this.numPlayers, this.groupSize);
+    this.numGroups = $.maximum(ms.map($.get('id', 's')));
+    this.groupSize = Math.ceil(this.numPlayers / this.numGroups);
+    initParent(ms);
   }
-  Base.call(this, GroupStage, groupStage(numPlayers, groupSize));
-  this.version = 1;
-  this.numPlayers = numPlayers;
-  this.numGroups = $.maximum(this.matches.map($.get('id', 's')));
-  this.groupSize = Math.ceil(numPlayers / this.numGroups);
-}
-GroupStage.prototype = Object.create(Base.prototype);
-GroupStage.parse = Base.parse.bind(null, GroupStage);
-GroupStage.idString = idString;
-GroupStage.invalid = invalid;
+  // NB: no propagation to do, no extra unscorable rules
+});
 
-// NB: score and unscorable defers entirely to Base
+GroupStage.idString = function (id) {
+  return "G" + id.s + " R" + id.r + " M" + id.m;
+};
+GroupStage.invalid = function (np, gs) {
+  if (!Number.isFinite(np) || Math.ceil(np) !== np ||
+      !Number.isFinite(gs) || Math.ceil(gs) !== gs) {
+    return "numPlayers and groupSize must be finite integers";
+  }
+  if (np < 3) {
+    return "GroupStage needs at least 3 players";
+  }
+  if (gs < 3) {
+    return "GroupStage needs a group size greater than or equal 3";
+  }
+  if (gs > np) {
+    return "cannot create GroupStage with groupSize > numPlayers";
+  }
+  return null;
+};
 
 // helper
 GroupStage.prototype.groupFor = function (playerId) {
@@ -88,7 +73,7 @@ GroupStage.prototype.results = function (opts) {
   var np = this.numPlayers;
 
   // init results array
-  var res = [];
+  var res = new Array(np);
   for (var s = 0; s < np; s += 1) {
     res[s] = {
       seed  : s + 1,
