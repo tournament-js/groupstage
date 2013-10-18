@@ -207,17 +207,9 @@ var results = function (ms, posAry, oldRes, mapsBreak) {
   });
 
   var getEntry = function (seed) {
-    var idx = -1;
-    for (var i = 0; i < res.length; i += 1) {
-      if (res[i].seed === seed) {
-        idx = i;
-        break;
-      }
-    }
-    if (idx === -1) {
-      throw new Error("old results does not contain seed " + seed);
-    }
-    return res[idx];
+    return res.filter(function (r) {
+      return r.seed === seed;
+    })[0]; // will throw if none found - but by construction it must exist
   };
 
   var getPlayersAbove = function (grpNum, gpos) {
@@ -320,10 +312,11 @@ function TieBreaker(gsResults, limit) {
     this.posAry = posByGroup(res);
     this.oldRes = gsResults;
     this.limit = limit;
-    Base.call(this, TieBreaker, createTbForGroups(this.posAry, limit));
+    Base.call(this, createTbForGroups(this.posAry, limit));
   }
 }
 TieBreaker.prototype = Object.create(Base.prototype);
+TieBreaker.prototype.rep = idString; // for now
 TieBreaker.parse = Base.parse.bind(null, TieBreaker);
 TieBreaker.invalid = invalid;
 TieBreaker.idString = idString;
