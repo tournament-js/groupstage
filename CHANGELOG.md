@@ -1,3 +1,8 @@
+0.2.0 / 2013-10-22
+==================
+  * Use tournament@0.16.0 interface
+  * Allow home and away matches (for double length) for `GroupStage` - for #1
+
 0.1.1 / 2013-10-16
 ==================
   * refactor `score` to use Base implementation
