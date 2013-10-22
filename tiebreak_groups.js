@@ -295,54 +295,17 @@ var results = function (ms, posAry, oldRes, mapsBreak) {
   return res.sort($.comparing('pos', +1, 'pts', -1, 'maps', -1, 'seed', +1));
 };
 
-// needs final gsResults
-function TieBreaker(gsResults, limit) {
-  if (!(this instanceof TieBreaker)) {
-    return new TieBreaker(gsResults, limit);
-  }
-  var invReason = invalid(gsResults, limit);
-  if (invReason !== null) {
-    console.error("invalid TieBreaker configuration: %dp from GroupStage results %j"
-      , limit, gsResults);
-    console.error("reason: ", invReason);
-  }
-  else {
-    var res = resultsByGroup(gsResults);
+var TieBreaker = Base.sub('TieBreaker', ['oldRes', 'limit'], {
+  init: function (initParent) {
+    var res = resultsByGroup(this.oldRes);
     this.version = 1;
     this.posAry = posByGroup(res);
-    this.oldRes = gsResults;
-    this.limit = limit;
-    Base.call(this, createTbForGroups(this.posAry, limit));
-  }
-}
-TieBreaker.prototype = Object.create(Base.prototype);
-TieBreaker.prototype.rep = idString; // for now
-TieBreaker.parse = Base.parse.bind(null, TieBreaker);
-TieBreaker.invalid = invalid;
-TieBreaker.idString = idString;
-
-// given valid (gsResults, limit) do we actually need to tiebreak to pick top limit?
-TieBreaker.isNecessary = function (gsResults, limit) {
-  var tb = new TieBreaker(gsResults, limit);
-  return (tb.matches && tb.matches.length > 0);
-};
-
-TieBreaker.prototype.unscorable = function (id, score, allowPast) {
-  var invReason = Base.prototype.unscorable.call(this, id, score, allowPast);
-  if (invReason !== null) {
-    return invReason;
-  }
-  if ($.nub(score).length !== score.length) {
-    return "scores must unambiguously decide every position";
-  }
-  return null;
-};
-
-TieBreaker.prototype.score = function (id, scs) {
-  if (Base.prototype.score.call(this, id, scs)) {
+    initParent(createTbForGroups(this.posAry, this.limit));
+  },
+  progress: function (match) {
     // if id.r === 1, we need to do some analysis to get who's in R2 (if it exists)
     var last = this.matches[this.matches.length-1];
-    if (id.r === 1 && last.id.r === 2) {
+    if (match.id.r === 1 && last.id.r === 2) {
       var r1 = this.matches.slice(0, -1); // only one match in R2
       if (r1.every($.get('m'))) {
         var numGroups = this.posAry.length;
@@ -352,15 +315,26 @@ TieBreaker.prototype.score = function (id, scs) {
         last.p = r2ps;
       }
     }
-    return true;
+  },
+  verify: function (match, score) {
+    if ($.nub(score).length !== score.length) {
+      return "scores must unambiguously decide every position";
+    }
+    return null;
   }
-  return false;
+});
+
+TieBreaker.invalid = invalid;
+TieBreaker.idString = idString;
+
+// given valid (gsResults, limit) do we actually need to tiebreak to pick top limit?
+TieBreaker.isNecessary = function (gsResults, limit) {
+  var tb = new TieBreaker(gsResults, limit);
+  return (tb.matches && tb.matches.length > 0);
 };
 
 TieBreaker.prototype.results = function () {
   return results(this.matches, this.posAry, this.oldRes, this.limit);
 };
-
-// upcoming uses the base implementation
 
 module.exports = TieBreaker;
