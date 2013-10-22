@@ -2,7 +2,14 @@ var $ = require('interlude')
   , Base = require('tournament')
   , algs = require('./balancer');
 
-var groupStage = function (numPlayers, groupSize) {
+var mapOdd = function (n) {
+  return n*2 - 1;
+};
+var mapEven = function (n) {
+  return n*2;
+};
+
+var groupStage = function (numPlayers, groupSize, hasAway) {
   var ms = algs.groups(numPlayers, groupSize);
 
   var matches = [];
@@ -13,18 +20,27 @@ var groupStage = function (numPlayers, groupSize) {
     for (var r = 0; r < rnds.length; r += 1) {
       var rnd = rnds[r];
       for (var m = 0; m < rnd.length; m += 1) {
-        var pls = rnd[m];
-        matches.push({id: {s: g + 1, r: r + 1, m: m + 1}, p : pls});
+        var plsH = rnd[m];
+        if (!hasAway) { // players only meet once
+          matches.push({ id: { s: g+1, r: r+1, m: m+1 }, p : plsH });
+        }
+        else { // players meet twice
+          var plsA = plsH.slice().reverse();
+          matches.push({ id: { s: g+1, r: mapOdd(r+1),  m: m+1 }, p: plsH });
+          matches.push({ id: { s: g+1, r: mapEven(r+1), m: m+1 }, p: plsA });
+        }
       }
     }
   }
   return matches.sort(Base.compareMatches);
 };
 
-var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize'], {
+var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize', 'opts'], {
   init: function (initParent) {
     this.version = 1;
-    var ms = groupStage(this.numPlayers, this.groupSize);
+    this.meetTwice = Boolean((this.opts || {}).meetTwice);
+    delete this.opts;
+    var ms = groupStage(this.numPlayers, this.groupSize, this.meetTwice);
     this.numGroups = $.maximum(ms.map($.get('id', 's')));
     this.groupSize = Math.ceil(this.numPlayers / this.numGroups);
     initParent(ms);
