@@ -1,6 +1,6 @@
 # GroupStage
 [![Build Status](https://secure.travis-ci.org/clux/groupstage.png)](http://travis-ci.org/clux/groupstage)
-[![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage
+[![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage)
 
     Stability: 3 - Stable
 
@@ -63,6 +63,8 @@ var score = function (id, score) {
   }
 };
 ```
+
+If you are clever, you can [subclass `GroupStage` and add this logic to the `verify` function on the subclass](https://github.com/clux/tournament/blob/master/doc/implementors.md).
 
 ## Special methods
 ### groupFor(seedNumber) :: [Match]
