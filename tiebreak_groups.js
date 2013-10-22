@@ -321,6 +321,10 @@ var TieBreaker = Base.sub('TieBreaker', ['oldRes', 'limit'], {
       return "scores must unambiguously decide every position";
     }
     return null;
+  },
+  limbo: function (playerId) {
+    // we know if a player has won a R1 match he will be in R2
+    // TODO: so do this check here
   }
 });
 
