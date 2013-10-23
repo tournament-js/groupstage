@@ -1,5 +1,6 @@
 var $ = require('interlude')
   , Base = require('tournament')
+  , robin = require('roundrobin')
   , algs = require('./balancer');
 
 var mapOdd = function (n) {
@@ -16,7 +17,7 @@ var groupStage = function (numPlayers, groupSize, hasAway) {
   for (var g = 0; g < ms.length; g += 1) {
     var group = ms[g];
     // make robin rounds for the group
-    var rnds = algs.robin(group.length, group);
+    var rnds = robin(group.length, group);
     for (var r = 0; r < rnds.length; r += 1) {
       var rnd = rnds[r];
       for (var m = 0; m < rnd.length; m += 1) {

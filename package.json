@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "interlude": "~1.0.2",
+    "roundrobin": "~1.0.0",
     "tournament": "~0.16.0"
   },
   "devDependencies": {
