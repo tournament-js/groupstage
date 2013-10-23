@@ -2,7 +2,7 @@
 [![Build Status](https://secure.travis-ci.org/clux/groupstage.png)](http://travis-ci.org/clux/groupstage)
 [![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage)
 
-    Stability: 3 - Stable
+    Stability: 2 - Unstable
 
 ## Overview
 GroupStage is a simple and customizable way to add a preliminary stage to a tournament.
