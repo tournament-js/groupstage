@@ -1,6 +1,7 @@
 var $ = require('interlude')
   , Base = require('tournament')
   , robin = require('roundrobin')
+  , grouper = require('group')
   , algs = require('./balancer');
 
 var mapOdd = function (n) {
@@ -11,7 +12,7 @@ var mapEven = function (n) {
 };
 
 var groupStage = function (numPlayers, groupSize, hasAway) {
-  var ms = algs.groups(numPlayers, groupSize);
+  var ms = grouper(numPlayers, groupSize);
 
   var matches = [];
   for (var g = 0; g < ms.length; g += 1) {
