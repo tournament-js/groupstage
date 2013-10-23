@@ -300,6 +300,7 @@ var TieBreaker = Base.sub('TieBreaker', ['oldRes', 'limit'], {
     var res = resultsByGroup(this.oldRes);
     this.version = 1;
     this.posAry = posByGroup(res);
+    this.numPlayers = this.oldRes.length;
     initParent(createTbForGroups(this.posAry, this.limit));
   },
   progress: function (match) {
