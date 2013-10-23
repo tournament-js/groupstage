@@ -65,6 +65,9 @@ test("gs 9 3 tied only between - proceed any", function (t) {
     t.equal(TieBreaker.invalid(res, n), null, "configuration valid");
     var tb = new TieBreaker(res, n);
     var tms = tb.matches;
+    tms.forEach(function (m) {
+      t.equal(m.id.s, 0, "all tb matches occur in s=0");
+    });
 
     if ([3, 6].indexOf(n) >= 0) {
       t.equal(tms.length, 0, "no TBs when picking equally from each group");
