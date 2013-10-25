@@ -44,7 +44,7 @@ var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize', 'opts'], {
     delete this.opts;
     var ms = groupStage(this.numPlayers, this.groupSize, this.meetTwice);
     this.numGroups = $.maximum(ms.map($.get('id', 's')));
-    this.groupSize = Math.ceil(this.numPlayers / this.numGroups);
+    this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // NB: is minimal
     initParent(ms);
   }
   // NB: no propagation to do, no extra unscorable rules
@@ -53,9 +53,9 @@ var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize', 'opts'], {
 GroupStage.idString = function (id) {
   return "G" + id.s + " R" + id.r + " M" + id.m;
 };
+
 GroupStage.invalid = function (np, gs) {
-  if (!Number.isFinite(np) || Math.ceil(np) !== np ||
-      !Number.isFinite(gs) || Math.ceil(gs) !== gs) {
+  if (!Base.isInteger(np) || !Base.isInteger(gs)) {
     return "numPlayers and groupSize must be finite integers";
   }
   if (np < 3) {
@@ -80,39 +80,30 @@ GroupStage.prototype.groupFor = function (playerId) {
   }
 };
 
-var defaultResOpts = {
+const defaultResOpts = {
   winPoints : 3,
   tiePoints : 1,
   mapsBreak : false
 };
 
-GroupStage.prototype.results = function (opts) {
+GroupStage.prototype.initResult = function (seed) {
+  return {
+    grp: this.groupFor(seed),
+    gpos: this.groupSize,
+    pts: 0,
+    for: 0,
+    against: 0,
+    wins: 0,
+    draws: 0,
+    losses: 0
+  };
+};
+GroupStage.prototype.stats = function (res, opts) {
   var cfg = $.extend(Object.create(defaultResOpts), opts || {});
   var np = this.numPlayers;
 
-  // init results array
-  var res = new Array(np);
-  for (var s = 0; s < np; s += 1) {
-    res[s] = {
-      seed  : s + 1,
-      maps  : 0,
-      pts   : 0, // robin rounds require points to determine position
-      pos   : np, // cannot estimate position before a group is fully played
-      wins  : 0,
-      draws : 0,
-      losses: 0,
-      grp   : this.groupFor(s+1),
-      gpos  : this.groupSize
-    };
-  }
-
-  var isDone = true;
-  for (var i = 0; i < this.matches.length; i += 1) {
-    var m = this.matches[i];
-    if (!m.m) {
-      isDone = false; // only lower `pos` when all matches played
-      continue; // only count played matches
-    }
+  // compute stats based on completed matches
+  this.matches.filter($.get('m')).forEach(function (m) {
     var p0 = m.p[0] - 1
       , p1 = m.p[1] - 1;
 
@@ -129,40 +120,31 @@ GroupStage.prototype.results = function (opts) {
       res[w].pts += cfg.winPoints;
       res[l].losses += 1;
     }
+    res[p0].for += m.m[0];
+    res[p1].for += m.m[1];
+    res[p0].against += m.m[1];
+    res[p1].against += m.m[0];
+  });
 
-    res[p0].maps += m.m[0];
-    res[p1].maps += m.m[1];
-  }
-  var compareResults = $.comparing('pts', -1, 'maps', -1);
-  res.sort(compareResults); // good start
+  res.sort(algs.compareResults);
+  var grps = algs.resultsByGroup(res, this.numGroups);
 
-  // create a list of res objects inside each group (sorted as res is)
-  var grps = $.replicate(this.numGroups, []);
-  for (var k = 0; k < res.length; k += 1) {
-    var p = res[k];
-    grps[p.grp - 1].push(p);
-  }
-
-  // find internal gpos attr for groups (each g sorted by compareResults as res is)
-  // also build up arrays of xplacers
+  // tieCompute within groups to get the `gpos` attribute
+  // at the same time build up array of xplacers
   var xarys = $.replicate(this.groupSize, []);
-  grps.forEach(function (g) {
+  grps.forEach(function (g) { // g sorted as res is
     algs.tieCompute(g, 0, cfg.mapsBreak, function (r, pos) {
       r.gpos = pos;
-      xarys[pos-1].push(r); // so we can nicely loop over xplacers later
+      xarys[pos-1].push(r);
     });
   });
-  // sort each xplacer array additionally for seed number
-  // they are ultimately tied between groups anyway at this stage
-  xarys.forEach(function (xs) {
-    xs.sort($.comparing('seed', +1));
-  });
 
-  // gradually build up and position res by one x-placers step at a time
-  // NB: result is sorted as each xarys is pushed in the same order as their g
+  // tieCompute across groups via xplacers to get the `pos` attribute
+  // also push into the final sorted results as we go along (so we preserve orders)
   var srtd = [];
+  var isDone = this.isDone();
   xarys.reduce(function (currPos, xplacers) {
-    xplacers.sort(compareResults);
+    xplacers.sort(algs.compareResults);
     algs.tieCompute(xplacers, currPos, cfg.mapsBreak, function (r, pos) {
       r.pos = isDone ? pos : np; // only position after done (lest pos decreases)
       srtd.push(r);
