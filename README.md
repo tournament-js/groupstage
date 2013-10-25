@@ -70,27 +70,6 @@ If you are clever, you can [subclass `GroupStage` and add this logic to the `ver
 ### groupFor(seedNumber) :: [Match]
 Get all the matches in the group that a given player is in.
 
-## Special helpers
-If you are requiring the tournament under the full entry point (i.e. `var t = require('tournament')`) then the meaty algorithms behind splitting up a list of seeds into fair groups and round robin scheduling for a group of size `n` are exposed for your experimental needs:
-
-### t.groups(numPlayers, groupSize) :: [Groups]
-
-```js
-t.groups(15, 5); // 15 players in groups of 5
-[ [ 1, 4, 7, 12, 15 ],
-  [ 2, 5, 8, 11, 14 ],
-  [ 3, 6, 9, 10, 13 ] ]
-```
-
-### t.robin(numPlayers) :: [Rounds]
-
-```js
-t.robin(4); // 4 player round robin pairups
-[ [ [ 1, 4 ], [ 2, 3 ] ],   // round 1
-  [ [ 1, 3 ], [ 4, 2 ] ],   // round 2
-  [ [ 1, 2 ], [ 3, 4 ] ] ]  // round 3
-```
-
 ## Caveats
 ### End results
 Acting on end results in a group stage is sometimes problematic. Ties are allowed, and complex, unexpected results can cause multi-way ties (it is possible for an entire group to tie), and `results()` even if ties have been disallowed. We cannot sensibly compensate for that without additional input:
@@ -115,7 +94,7 @@ Like for most other tournaments, seeding is important. The initial player partit
  - If the number of players is divisible by the number of groups (ideal condition), then the sum of the seeds in each group differ by at most the number of groups.
 
 ```js
-t.groups(15, 5); // 15 players in groups of 5
+require('group')(15, 5); // 15 players in groups of 5
 [ [ 1, 4, 7, 12, 15 ],
   [ 2, 5, 8, 11, 14 ],
   [ 3, 6, 9, 10, 13 ] ]
@@ -126,7 +105,7 @@ t.groups(15, 5); // 15 players in groups of 5
 These conditions make standard group arrangements like 16 players in groups of 4 perfectly fair, provided the seeding is perfect.
 
 ```js
-> t.groups(16, 4)
+require('group')(16, 4)
 [ [ 1, 5, 12, 16 ],
   [ 2, 6, 11, 15 ],
   [ 3, 7, 10, 14 ],
@@ -134,6 +113,9 @@ These conditions make standard group arrangements like 16 players in groups of 4
 ```
 
 This model ensures that unusual results are directly caused by upsets (a presumed bad player beats a higher ranked one), not the fact that the top 4 players was in one group, causing lower ranked players to advance from the group stage without merit.
+
+## Architechture
+This whole library is essentially small tournament wrapper around the [group library](https://github.com/clux/group) and the [round robin library](https://github.com/clux/roundrobin). These are worth looking into for UI helpers or understanding.
 
 ## License
 MIT-Licensed. See LICENSE file for details.
