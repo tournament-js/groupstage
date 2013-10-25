@@ -11,7 +11,7 @@ test("group stage 16 4 uefa", function (t) {
   t.equal(uefa.findMatches({s:1}).length, 6, '6 matches per group');
 
   uefa.matches.forEach(function (m) {
-    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [1,0] : [0, 1]));
+    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]));
   });
   // score st groups decided unanimously based on seeds:
   // thus: group 1: [1, 3, 6],, group 2: [2, 4, 5]
@@ -21,7 +21,8 @@ test("group stage 16 4 uefa", function (t) {
   var res = uefa.results();
   var expected = [{
     "seed" : 1,
-    "maps" : 4,
+    "for" : 8,
+    "against": 4,
     "pts" : 12,
     "pos" : 1,
     "wins" : 4,
@@ -31,7 +32,8 @@ test("group stage 16 4 uefa", function (t) {
     "gpos" : 1
   },{
     "seed" : 2,
-    "maps" : 4,
+    "for" : 8,
+    "against": 4,
     "pts" : 12,
     "pos" : 1,
     "wins" : 4,
@@ -41,7 +43,8 @@ test("group stage 16 4 uefa", function (t) {
     "gpos" : 1
   },{
     "seed" : 3,
-    "maps" : 2,
+    "for" : 6,
+    "against": 6,
     "pts" : 6,
     "pos" : 3,
     "wins" : 2,
@@ -51,7 +54,8 @@ test("group stage 16 4 uefa", function (t) {
     "gpos" : 2
   },{
     "seed" : 4,
-    "maps" : 2,
+    "for" : 6,
+    "against": 6,
     "pts" : 6,
     "pos" : 3,
     "wins" : 2,
@@ -61,7 +65,8 @@ test("group stage 16 4 uefa", function (t) {
     "gpos" : 2
   },{
     "seed" : 5,
-    "maps" : 0,
+    "for" : 4,
+    "against": 8,
     "pts" : 0,
     "pos" : 5,
     "wins" : 0,
@@ -71,7 +76,8 @@ test("group stage 16 4 uefa", function (t) {
     "gpos" : 3
   },{
     "seed" : 6,
-    "maps" : 0,
+    "for" : 4,
+    "against": 8,
     "pts" : 0,
     "pos" : 5,
     "wins" : 0,

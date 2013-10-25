@@ -122,34 +122,40 @@ test("gs 6 3 unique groups !mapsBreak", function (t) {
     gs.score(m.id, (m.id.r === m.id.s) ? [0, a] : [a, 0]);
   });
 
-  // just to verify:
-  // grp1 should have pts 6 3 0 maps 7 2 0
-  // grp2 should have pts 3 3 3 maps 5 4 3
+  // just to verify the grand scheme:
+  // grp1 should have pts 6 3 0 mapsFor 7 2 0 mapsAgainst 0 3 6
+  // grp2 should have pts 3 3 3 mapsFor 5 4 3 mapsAgainst 4 5 3
+  var makeStr = function(r) {
+    var str = "P" + r.seed + " WDL=" + r.wins + ',' + r.draws + ',' + r.losses;
+    str += " F=" + r.for + " A=" + r.against;
+    str += " => GPOS=" + r.gpos + " in grp " + r.grp;
+    return str;
+  };
+  t.deepEqual(gs.results({mapsBreak: false}).map(makeStr), [
+    'P1 WDL=2,0,0 F=7 A=0 => GPOS=1 in grp 1',
+    'P2 WDL=1,0,1 F=5 A=4 => GPOS=1 in grp 2',
+    'P4 WDL=1,0,1 F=3 A=5 => GPOS=1 in grp 2',
+    'P5 WDL=1,0,1 F=4 A=3 => GPOS=1 in grp 2',
+    'P6 WDL=1,0,1 F=2 A=3 => GPOS=2 in grp 1',
+    'P3 WDL=0,0,2 F=0 A=6 => GPOS=3 in grp 1'
+  ],
+    "no break results"
+  );
+
+  t.deepEqual(gs.results({mapsBreak: true}).map(makeStr), [
+    'P1 WDL=2,0,0 F=7 A=0 => GPOS=1 in grp 1',
+    'P2 WDL=1,0,1 F=5 A=4 => GPOS=1 in grp 2',
+    'P4 WDL=1,0,1 F=3 A=5 => GPOS=2 in grp 2',
+    'P6 WDL=1,0,1 F=2 A=3 => GPOS=2 in grp 1',
+    'P5 WDL=1,0,1 F=4 A=3 => GPOS=3 in grp 2',
+    'P3 WDL=0,0,2 F=0 A=6 => GPOS=3 in grp 1'
+  ],
+    "map break results"
+  );
+
   [false, true].forEach(function (mapsBreak) {
+    // given two different GROUPSTAGE results, create a tiebreaker from it
     var res = gs.results({mapsBreak: mapsBreak});
-    var resGrpX = function (grp) {
-      return res.filter(function (r) {
-        return r.grp === grp;
-      });
-    };
-    var resGrp1 = resGrpX(1);
-    var resGrp2 = resGrpX(2);
-    var pts1 = $.pluck('pts', resGrp1).sort($.compare(-1));
-    var pts2 = $.pluck('pts', resGrp2).sort($.compare(-1));
-    t.deepEqual(pts1, [6, 3, 0], "pts group 1");
-    t.deepEqual(pts2, [3, 3, 3], "pts group 2");
-
-    // with !mapsBreak, should have ties and tiebreakers within group 2
-    var gpos1 = $.pluck('gpos', resGrp1).sort($.compare());
-    var gpos2 = $.pluck('gpos', resGrp2).sort($.compare());
-    t.deepEqual(gpos1, [1, 2, 3], "gpos group 1");
-    if (!mapsBreak) {
-      t.deepEqual(gpos2, [1, 1, 1], "gpos group 2");
-    }
-    else {
-      t.deepEqual(gpos2, [1, 2, 3], "gpos group2 mapsBreak");
-    }
-
 
     t.ok(!TieBreaker.isNecessary(res, 6), "tiebreaker necessary for " + 6);
     [2, 4].forEach(function (n) {
@@ -188,7 +194,14 @@ test("gs 6 3 unique groups !mapsBreak", function (t) {
           t.deepEqual(m.p, [1, 2], "winners proceeded to R2 now");
         }
         if (n === 3) {
-          t.deepEqual(m.p, [5, 6], "winners proceeded to R2 now");
+          if (!mapsBreak) {
+            // because scored r1 [3,1,2] p2 wins g2, p5 gets second, p4 gets third
+            t.deepEqual(m.p, [5, 6], "2nd placers proceeded to R2 now");
+          }
+          if (mapsBreak) {
+            // because no r1, and mapsBroke, the clear 2nd placers are in between
+            t.deepEqual(m.p, [4, 6], "2nd placers proceeded to R2 now");
+          }
         }
         t.equal(tb.unscorable(m.id, [2,1]), null, "can score r2 now");
         t.ok(tb.score(m.id, [2,1]), "could score r2");

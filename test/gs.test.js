@@ -77,9 +77,9 @@ test("group stage 32 8", function (t) {
 
   res.forEach(function (r) {
     t.ok(r.wins >= 0 && r.wins <= 7, "between 0 and 7 wins");
-    t.ok(r.maps >= 0 && r.maps <= 2*7, "between 0 and 14 maps");
+    t.ok(r.for >= 0 && r.for <= 2*7, "between 0 and 14 maps");
     t.ok(r.pos >= 1 && r.pos <= 32, "places between 1 and 32");
-    t.equal(r.maps, r.wins*2, "maps === wins*2 for each result summary here");
+    t.equal(r.for, r.wins*2, "maps === wins*2 for each result summary here");
     t.equal(r.pts, r.wins*3, "points == 3 per mapwin");
     t.ok(r.gpos !== undefined, "group property exists");
     t.ok(1 <= r.grp && r.grp <= 4, "grp stored");
@@ -226,7 +226,7 @@ test("res test 9 3 without allow map breaks for ties", function (t) {
       t.equal(r.wins, 0, r.seed + " should have exactly zero wins pre-start");
       t.equal(r.draws, 0, r.seed + " should have exactly zero draws pre-start");
       t.equal(r.losses, 0, r.seed + " should have exactly zero losses pre-start");
-      t.equal(r.maps, 0, r.seed + " should have exactly zero map scrs pre-start");
+      t.equal(r.for, 0, r.seed + " should have exactly zero map scrs pre-start");
       t.ok(1 <= r.grp && r.grp <= 3, r.seed + " should have grp stored");
       t.ok(r.gpos !== undefined, r.seed + " should have gpos stored");
       t.ok(r.seed > 0 && r.seed <= 9, "seeds are 1-indexed: " + r.seed);
