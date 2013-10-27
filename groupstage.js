@@ -80,12 +80,6 @@ GroupStage.prototype.groupFor = function (playerId) {
   }
 };
 
-const defaultResOpts = {
-  winPoints : 3,
-  tiePoints : 1,
-  mapsBreak : false
-};
-
 GroupStage.prototype.initResult = function (seed) {
   return {
     grp: this.groupFor(seed),
@@ -98,6 +92,13 @@ GroupStage.prototype.initResult = function (seed) {
     losses: 0
   };
 };
+
+const defaultResOpts = {
+  winPoints : 3,
+  tiePoints : 1,
+  scoresBreak : false
+};
+
 GroupStage.prototype.stats = function (res, opts) {
   var cfg = $.extend(Object.create(defaultResOpts), opts || {});
   var np = this.numPlayers;
@@ -133,7 +134,7 @@ GroupStage.prototype.stats = function (res, opts) {
   // at the same time build up array of xplacers
   var xarys = $.replicate(this.groupSize, []);
   grps.forEach(function (g) { // g sorted as res is
-    algs.tieCompute(g, 0, cfg.mapsBreak, function (r, pos) {
+    algs.tieCompute(g, 0, cfg.scoresBreak, function (r, pos) {
       r.gpos = pos;
       xarys[pos-1].push(r);
     });
@@ -145,7 +146,7 @@ GroupStage.prototype.stats = function (res, opts) {
   var isDone = this.isDone();
   xarys.reduce(function (currPos, xplacers) {
     xplacers.sort(algs.compareResults);
-    algs.tieCompute(xplacers, currPos, cfg.mapsBreak, function (r, pos) {
+    algs.tieCompute(xplacers, currPos, cfg.scoresBreak, function (r, pos) {
       r.pos = isDone ? pos : np; // only position after done (lest pos decreases)
       srtd.push(r);
     });
