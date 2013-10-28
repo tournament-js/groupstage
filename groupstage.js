@@ -127,7 +127,7 @@ GroupStage.prototype.stats = function (res, opts) {
     res[p1].against += m.m[0];
   });
 
-  res.sort(algs.compareResults);
+  res.sort(algs.compareResults(cfg.scoresBreak));
   var grps = algs.resultsByGroup(res, this.numGroups);
 
   // tieCompute within groups to get the `gpos` attribute
@@ -142,17 +142,10 @@ GroupStage.prototype.stats = function (res, opts) {
 
   // tieCompute across groups via xplacers to get the `pos` attribute
   // also push into the final sorted results as we go along (so we preserve orders)
-  var srtd = [];
-  var isDone = this.isDone();
-  xarys.reduce(function (currPos, xplacers) {
-    xplacers.sort(algs.compareResults);
-    algs.tieCompute(xplacers, currPos, cfg.scoresBreak, function (r, pos) {
-      r.pos = isDone ? pos : np; // only position after done (lest pos decreases)
-      srtd.push(r);
-    });
-    return currPos + xplacers.length; // always break up xplacers and (x+1)placers
-  }, 0);
-  return srtd;
+  if (this.isDone()) {
+    algs.positionFromXarys(xarys, cfg.scoresBreak); // position iff done
+  }
+  return res.sort(algs.finalCompare); // ensure sorted by pos primarily
 };
 
 module.exports = GroupStage;

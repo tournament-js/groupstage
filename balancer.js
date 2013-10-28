@@ -1,4 +1,4 @@
-// helper that takes a result array slice that contains pts and maps
+// helper that takes a result array slice that contains .pts, .for, and .against
 // and calls back with the new position relative to startPos and ary slice
 // that it would have gotten from this computation
 exports.tieCompute = function (ary, startPos, scoreBreak, cb) {
@@ -34,8 +34,40 @@ exports.resultsByGroup = function (results, numGroups) {
   return grps;
 };
 
-exports.compareResults = function (x, y) {
-  return (y.pts - x.pts) ||
-         ((y.for - y.against) - (x.for - x.against)) ||
-         (x.seed - y.seed);
+exports.positionFromXarys = function (xarys, scoresBreak) {
+  // tieCompute across groups via xplacers to get the `pos` attribute
+  var sorter = exports.compareResults(scoresBreak);
+  xarys.reduce(function (currPos, xplacers) {
+    xplacers.sort(sorter);
+    exports.tieCompute(xplacers, currPos, scoresBreak, function (r, pos) {
+      r.pos = pos;
+    });
+    return currPos + xplacers.length; // always break up xplacers and (x+1)placers
+  }, 0);
 };
+
+// priority: 1. points, 2. breakingDiff, 3. tbR2Points, 4. visualDiff, 5. seed
+// first 3 will end up breaking up `pos` attributes
+exports.compareResults = function (scoresBreak) {
+  return function (x, y) {
+    if (x.pts !== y.pts) {
+      return y.pts - x.pts;
+    }
+    var scoreDiff = ((y.for - y.against) - (x.for - x.against));
+    if (scoresBreak && scoreDiff) {
+      return scoreDiff;
+    }
+    if (x.tb != null && y.tb != null) {
+      return y.tb - x.tb;
+    }
+    return scoreDiff || (x.seed - y.seed);
+  };
+};
+
+var visualScorer = exports.compareResults(true);
+exports.finalCompare = function (x, y) {
+  if (x.pos !== y.pos) {
+    return x.pos - y.pos;
+  }
+  return visualScorer(x, y);
+}
