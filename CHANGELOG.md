@@ -1,3 +1,9 @@
+0.4.0 / 2013-10-XX
+==================
+  * GroupStage sorting now takes into account score losses (`.against`)
+  * TieBreaker positions are now demoted before it is done
+  * Many other TieBreaker results improvements
+
 0.3.0 / 2013-10-25
 ==================
   * Using tournament@0.17.0 for better stats interface
