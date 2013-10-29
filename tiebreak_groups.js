@@ -31,16 +31,6 @@ var idString = function (id) {
   return "Between groups tiebreaker";
 };
 
-// given untied R1 (reflected in posAry) generate players in R2
-var generateR2 = function (posAry, position) {
-  return posAry.map(function (seedAry) {
-    if (seedAry[position].length !== 1) {
-      throw new Error("cannot generate TieBreaker round 2: round 1 still tied!");
-    }
-    return seedAry[position][0];
-  }).sort($.compare());
-};
-
 /**
  * FFA tiebreakers
  *
@@ -57,8 +47,19 @@ var generateR2 = function (posAry, position) {
  *
  * These matches must be entered scores to represent the actual tiebreaker event.
  * NO SCORES THEREIN CAN TIE.
- * Results (advancers) can be picked from last match (from 2.)
+ * GroupStage scores will be updated (to not have ties) after TieBreaker done
  */
+
+// given untied R1 (reflected in posAry) generate players in R2
+var generateR2 = function (posAry, position) {
+  return posAry.map(function (seedAry) {
+    if (seedAry[position].length !== 1) {
+      throw new Error("cannot generate TieBreaker round 2: round 1 still tied!");
+    }
+    return seedAry[position][0];
+  }).sort($.compare());
+};
+
 var createTbForGroups = function (posAry, limit) {
   var numGroups = posAry.length;
   var rem = limit % numGroups;
@@ -96,28 +97,25 @@ var createTbForGroups = function (posAry, limit) {
       else if (posXs.length > unchosen) {
         // any other type where the chunks doesnt fit, we need to tiebreak
         // this chunk doesnt fit, need to tiebreak it
-        ms.push({id: {s:0, r:1, m:k+1}, p: posXs});
+        ms.push({ id: { s: 0, r: 1, m: k+1 }, p: posXs });
         break; // done what we needed for this group
       }
     }
   }
 
-
   // need between match when we don't pick a multiple of numGroups
   if (rem > 0 && ms.length > 0) {
-    ms.push({id: {s:0, r:2, m:1}, p: $.replicate(numGroups, Base.NONE)});
+    ms.push({ id: { s: 0, r: 2, m: 1 }, p: $.replicate(numGroups, Base.NONE) });
   }
   else if (rem > 0) {
     // in this case we know who starts out in R2 - everyone at gpos position+1
     // we know this position is untied because ms.length === 0 here
 
-    var r2ps = generateR2(posAry, position);
-    ms.push({id: {s:0, r:2, m:1}, p: r2ps});
+    ms.push({ id: { s: 0, r: 2, m: 1 }, p: generateR2(posAry, position) });
   }
 
   return ms;
 };
-
 
 // returns an array (one per group) of seedArys
 // where each seedAry is the group's seeds partitioned by their gpos
@@ -166,31 +164,39 @@ var posByGroup2 = function (posAry, r1) {
 var TieBreaker = Base.sub('TieBreaker', ['oldRes', 'limit'], {
   init: function (initParent) {
     this.version = 1;
-    this.numPlayers = this.oldRes.length;
     this.numGroups = $.maximum(this.oldRes.map($.get('grp')));
+    this.groupSize = Math.ceil(this.oldRes.length / this.numGroups);
     this.posAry = posByGroup(this.oldRes, this.numGroups);
     initParent(createTbForGroups(this.posAry, this.limit));
-  },
-  progress: function (match) {
-    // if id.r === 1, we need to do some analysis to get who's in R2 (if it exists)
-    var last = this.matches[this.matches.length-1];
-    if (match.id.r === 1 && last.id.r === 2) {
-      var r1 = this.matches.slice(0, -1); // only one match in R2
-      if (r1.every($.get('m'))) {
-        var position = Math.floor(this.limit / this.numGroups);
-        var posAry2 = posByGroup2(this.posAry, r1);
-        var r2ps = generateR2(posAry2, position);
+    var r1 = this.findMatches({r:1});
+    var r2 = this.findMatches({r:2});
+    this.numPlayers = this.oldRes.length;
 
-        last.p = r2ps;
-      }
+    // need to demote positions until stuff has been played
+    // NB: if this tournament is contained in a groupstage wrapper
+    // we never see the positions from groupstage because they are tied at `np`
+    // until it is done, but when it is done, results are deferred to TieBreaker
+    var numTbPlayers = $.flatten(r1.map($.get('p'))).length;
+    if (r2.length) {
+      numTbPlayers += (this.numGroups - r1.length);
     }
+    var pls = this.players();
+    var tieStart = this.limit + numTbPlayers - 1;
+    this.oldRes.forEach(function (r) {
+      if (pls.indexOf(r.seed) >= 0) {
+        console.log('bumping', r.seed, 'to', tieStart);
+        r.pos = tieStart;
+      }
+    });
   },
+
   verify: function (match, score) {
     if ($.nub(score).length !== score.length) {
       return "scores must unambiguously decide every position";
     }
     return null;
   },
+
   limbo: function (playerId) {
     // we know if a player has won a R1 match he will be in R2
     // TODO: so do this check here
@@ -216,16 +222,12 @@ TieBreaker.prototype.initResult = function (seed) {
 
 TieBreaker.prototype.stats = function (res, opts) {
   var ms = this.matches;
-  var mapsBreak = opts; // TODO: make an options object
+  var scoresBreak = opts; // TODO: make an options object
   var oldRes = this.oldRes;
   var last = ms[ms.length-1];
   var hasR2 = (last.id.r === 2);
   var r1 = hasR2 ? ms.slice(0, -1) : ms;
-  if (!r1.every($.get('m'))) {
-    return oldRes; // results in the middle of or before r1 are nonsensical
-  }
-
-  // TODO: count .for/.against/.wins/.losses/.draws on tiebreaker matches?
+  // NB: we do not care about stats from the matches apart from what it broke
 
   // r1 matches determine gpos for the tied cluster at limit border
   var getPlayersAboveInGroup = function (grpNum, gpos) {
@@ -233,65 +235,38 @@ TieBreaker.prototype.stats = function (res, opts) {
       return (r.grp === grpNum && r.gpos < gpos);
     }).length;
   };
-  r1.forEach(function (m) {
+  // so make gpos correct for the scored r1 matches
+  r1.filter($.get('m')).forEach(function (m) {
     Base.sorted(m).forEach(function (p, j) { // know this match is untied
       var resEl = res[p-1];
       resEl.gpos = j + getPlayersAboveInGroup(m.id.m, resEl.gpos) + 1;
     });
   });
 
-  // split posAry2 into xplacers array (similar to the one in GroupStage)
-  // array of positions, all of which are arrays of people with same gpos (between)
-  var groupSize = Math.ceil(this.numPlayers / this.numGroups);
-  var xarys = $.replicate(groupSize, []);
-  posByGroup2(this.posAry, r1).forEach(function (grp) {
-    grp.forEach(function (gxp, i) {
-      gxp.forEach(function (s) {
-        xarys[i].push(res[s-1]); // convert seed to result entry
+  if (r1.every($.get('m'))) {
+    // split posAry2 into xplacers array (similar to the one in GroupStage)
+    // array of positions, all of which are arrays of people with same gpos (between)
+    var xarys = $.replicate(this.groupSize, []);
+    posByGroup2(this.posAry, r1).forEach(function (grp) {
+      grp.forEach(function (gxp, i) {
+        gxp.forEach(function (s) {
+          xarys[i].push(res[s-1]); // convert seed to result entry
+        });
       });
     });
-  });
 
-  // then do the full tieCompute reduction that accounts for points and maps
-  xarys.reduce(function (currPos, xplacers) {
-    xplacers.sort(algs.compareResults);
+    // account for between groups match by keeping track of an extra property
+    if (hasR2 && last.m) {
+      last.p.forEach(function (p, i) {
+        res[p-1].tb = last.m[i];
+      });
+    }
 
-    // we can identify the R2 match players as a cluster
-    // i.e. last.p ==== seeds from xplacers
-    // because posAry2 will have resolved within clusters that are relevant
-    // so the xplacer array only refers to the xplacers at the limit point
-    // in the case when the limit point does not divide numGroups
-    var inBetweenCluster = (hasR2 && last.p.indexOf(xplacers[0].seed) >= 0);
-    var betweenPos;
-
-    // TODO: verify seed sort (different from GroupStage - but GS seem overkill now)
-    algs.tieCompute(xplacers, currPos, mapsBreak, function (r, pos, i) {
-      if (inBetweenCluster && i === 0) {
-        betweenPos = pos;
-      }
-      // inBetweenCluster case we want to maintain the tied position
-      // because after R2 we adjust the pos manually for this specific cluster
-      r.pos = inBetweenCluster ? betweenPos : pos;
-    });
-    return currPos += xplacers.length; // next pos needs to simply start this far off
-  }, 0);
-
-
-  // change .pos of the players in the R2 match if exists and played
-  // TODO: bug here atm: if xarys reduction have already positioned these
-  // as one better than the other, then the shift will fuck it up!
-  if (hasR2 && last.m) {
-    Base.sorted(last).forEach(function (p, i) {
-      // top were all tied a same x-placement, so when scoring, anything but 1st
-      // is a linear increase in pos (and this does not affect lower clusters)
-      res[p-1].pos += i;
-    });
+    if (this.isDone()) {
+      algs.positionFromXarys(xarys, scoresBreak);
+    }
   }
-
-  // quick way of doing the sort for r2:
-  // not necessary to do the full xarys reduce again because we only changed a very
-  // specific subset of the xary - so all `pos` values are correct!
-  return res.sort($.comparing('pos', +1, 'pts', -1, 'maps', -1, 'seed', +1));
+  return res.sort(algs.finalCompare);
 };
 
 module.exports = TieBreaker;

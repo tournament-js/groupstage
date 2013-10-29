@@ -1,8 +1,8 @@
 var tap = require('tap')
   , test = tap.test
-  , GroupStage = require('../groupstage');
+  , GroupStage = require('../');
 
-test("group stage 16 4 uefa", function (t) {
+test("group stage 6 3 uefa", function (t) {
   var gs = new GroupStage(6, 3);
 
   t.equal(gs.findMatches({s:1}).length, 3, '3 matches per group');
