@@ -223,51 +223,54 @@ test("res test 9 3 checking scoresBreak (but equal score diff)", function (t) {
 
   // run these tests twice, once tieing map scores ([1,0] all) snd run [a,0] all
   // where a is variant (here depending on group number for simplicity)
-  var opts = { groupSize: 3 };
-  var g = new GroupStage(9, opts);
-
-  // verify initial conditions
-  var res0 = g.results();
-  t.ok(res0, "got res0");
-  var found = [];
-  res0.forEach(function (r) {
-    t.equal(r.pos, 9, r.seed + " should be tied with everyone pre-start");
-    t.equal(r.wins, 0, r.seed + " should have exactly zero wins pre-start");
-    t.equal(r.draws, 0, r.seed + " should have exactly zero draws pre-start");
-    t.equal(r.losses, 0, r.seed + " should have exactly zero losses pre-start");
-    t.equal(r.for, 0, r.seed + " should have exactly zero map scrs pre-start");
-    t.ok(1 <= r.grp && r.grp <= 3, r.seed + " should have grp stored");
-    t.ok(r.gpos !== undefined, r.seed + " should have gpos stored");
-    t.ok(r.seed > 0 && r.seed <= 9, "seeds are 1-indexed: " + r.seed);
-    t.ok(found.indexOf(r.seed) < 0, "seeds are unique: " + r.seed);
-    found.push(r.seed);
-  });
-  t.equal(found.length, 9, "result length is 9");
-  found.forEach(function (f) {
-    t.equal(Math.ceil(f), f, "found seed number is an integer: " + f);
-  });
-
-  // score rounds one by one and verify that everything ties as expected
-  score(g, 1);
-  var res1 = g.results();
-  t.ok(res1, "got res1");
-  res1.forEach(function (r) {
-    t.equal(r.pos, 9, "all players are tied at 9th before done");
-    t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
-  });
-
-  score(g, 2);
-  var res2 = g.results();
-  t.ok(res2, "got res2");
-  res2.forEach(function (r) {
-    t.equal(r.pos, 9, "all players are tied at 9th before done");
-    t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
-  });
-
-  // score remaining matches, now pos should only tie in a particular situation
-  score(g, 3);
   [false, true].forEach(function (scoresBreak) {
-    var res3 = g.results({scoresBreak: scoresBreak});
+
+    var opts = { groupSize: 3 , scoresBreak: scoresBreak};
+    var g = new GroupStage(9, opts);
+
+    // verify initial conditions
+    var res0 = g.results();
+    t.ok(res0, "got res0");
+    var found = [];
+    res0.forEach(function (r) {
+      t.equal(r.pos, 9, r.seed + " should be tied with everyone pre-start");
+      t.equal(r.wins, 0, r.seed + " should have exactly zero wins pre-start");
+      t.equal(r.draws, 0, r.seed + " should have exactly zero draws pre-start");
+      t.equal(r.losses, 0, r.seed + " should have exactly zero losses pre-start");
+      t.equal(r.for, 0, r.seed + " should have exactly zero map scrs pre-start");
+      t.ok(1 <= r.grp && r.grp <= 3, r.seed + " should have grp stored");
+      t.ok(r.gpos !== undefined, r.seed + " should have gpos stored");
+      t.ok(r.seed > 0 && r.seed <= 9, "seeds are 1-indexed: " + r.seed);
+      t.ok(found.indexOf(r.seed) < 0, "seeds are unique: " + r.seed);
+      found.push(r.seed);
+    });
+    t.equal(found.length, 9, "result length is 9");
+    found.forEach(function (f) {
+      t.equal(Math.ceil(f), f, "found seed number is an integer: " + f);
+    });
+
+    // score rounds one by one and verify that everything ties as expected
+    score(g, 1);
+    var res1 = g.results();
+    t.ok(res1, "got res1");
+    res1.forEach(function (r) {
+      t.equal(r.pos, 9, "all players are tied at 9th before done");
+      t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
+    });
+
+    score(g, 2);
+    var res2 = g.results();
+    t.ok(res2, "got res2");
+    res2.forEach(function (r) {
+      t.equal(r.pos, 9, "all players are tied at 9th before done");
+      t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
+    });
+
+    // score remaining matches, now pos should only tie in a particular situation
+    score(g, 3);
+
+    // this last chunk verifies scoresBreak
+    var res3 = g.results();
     t.ok(res3, "got res3");
     res3.forEach(function (r) {
       if (r.seed <= 3) { // top 3 (1st-placers)
@@ -298,6 +301,7 @@ test("res test 9 3 checking scoresBreak (but equal score diff)", function (t) {
       }
       t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
     });
+
   });
 
   t.end();

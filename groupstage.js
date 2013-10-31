@@ -41,13 +41,20 @@ var GroupStage = Base.sub('GroupStage', function (opts, initParent) {
   var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice);
   this.numGroups = $.maximum(ms.map($.get('id', 's')));
   this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // perhaps reduced
+  this.winPoints = opts.winPoints;
+  this.tiePoints = opts.tiePoints;
+  this.scoresBreak = opts.scoresBreak;
   initParent(ms);
 });
 
 GroupStage.configure({
   defaults: function (np, opts) {
-    opts.groupSize = opts.groupSize || np; // no group size => league
-    opts.meetTwice = !!opts.meetTwice;
+    // no group size set => league
+    opts.groupSize = Number.isFinite(opts.groupSize) ? opts.groupSize : np;
+    opts.meetTwice = Boolean(opts.meetTwice);
+    opts.winPoints = Number.isFinite(opts.winPoints) ? opts.winPoints : 3;
+    opts.tiePoints = Number.isFinite(opts.tiePoints) ? opts.tiePoints : 1;
+    opts.scoresBreak = Boolean(opts.scoresBreak);
     return opts;
   },
 
@@ -95,23 +102,15 @@ GroupStage.prototype.initResult = function (seed) {
   };
 };
 
-const defaultResOpts = {
-  winPoints : 3,
-  tiePoints : 1,
-  scoresBreak : false
-};
-
-GroupStage.prototype.stats = function (res, opts) {
-  var cfg = $.extend(Object.create(defaultResOpts), opts || {});
-
+GroupStage.prototype.stats = function (res) {
   // compute stats based on completed matches
   this.matches.filter($.get('m')).forEach(function (m) {
     var p0 = m.p[0] - 1
       , p1 = m.p[1] - 1;
 
     if (m.m[0] === m.m[1]) {
-      res[p0].pts += cfg.tiePoints;
-      res[p1].pts += cfg.tiePoints;
+      res[p0].pts += this.tiePoints;
+      res[p1].pts += this.tiePoints;
       res[p0].draws += 1;
       res[p1].draws += 1;
     }
@@ -119,23 +118,24 @@ GroupStage.prototype.stats = function (res, opts) {
       var w = (m.m[0] > m.m[1]) ? p0 : p1;
       var l = (m.m[0] > m.m[1]) ? p1 : p0;
       res[w].wins += 1;
-      res[w].pts += cfg.winPoints;
+      res[w].pts += this.winPoints;
       res[l].losses += 1;
     }
     res[p0].for += m.m[0];
     res[p1].for += m.m[1];
     res[p0].against += m.m[1];
     res[p1].against += m.m[0];
-  });
+  }.bind(this));
 
-  res.sort(algs.compareResults(cfg.scoresBreak));
+  var scoresBreak = this.scoresBreak;
+  res.sort(algs.compareResults(scoresBreak));
   var grps = algs.resultsByGroup(res, this.numGroups);
 
   // tieCompute within groups to get the `gpos` attribute
   // at the same time build up array of xplacers
   var xarys = $.replicate(this.groupSize, []);
   grps.forEach(function (g) { // g sorted as res is
-    algs.tieCompute(g, 0, cfg.scoresBreak, function (r, pos) {
+    algs.tieCompute(g, 0, scoresBreak, function (r, pos) {
       r.gpos = pos;
       xarys[pos-1].push(r);
     });
@@ -144,7 +144,7 @@ GroupStage.prototype.stats = function (res, opts) {
   // tieCompute across groups via xplacers to get the `pos` attribute
   // also push into the final sorted results as we go along (so we preserve orders)
   if (this.isDone()) {
-    algs.positionFromXarys(xarys, cfg.scoresBreak); // position iff done
+    algs.positionFromXarys(xarys, scoresBreak); // position iff done
   }
   return res.sort(algs.finalCompare); // ensure sorted by pos primarily
 };

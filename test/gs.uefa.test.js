@@ -3,7 +3,7 @@ var tap = require('tap')
   , GroupStage = require('../');
 
 test("group stage 6 3 uefa", function (t) {
-  var opts = { groupSize: 3 };
+  var opts = { groupSize: 3, scoresBreak: true };
   var gs = new GroupStage(6, opts);
 
   t.equal(gs.findMatches({s:1}).length, 3, '3 matches per group');
@@ -20,7 +20,7 @@ test("group stage 6 3 uefa", function (t) {
   // no tiebreaking, so xplacers: [[1,2], [], [3, 4], [], [5, 6], []]
   // (shared 1st, shared 3rd, shared 5th)
 
-  var res = uefa.results({scoresBreak: true});
+  var res = uefa.results();
   res.forEach(function (r) {
     t.equal(r.draws, 0, "no draws");
     delete r.draws;
