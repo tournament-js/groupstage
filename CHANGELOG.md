@@ -3,6 +3,8 @@
   * GroupStage sorting now takes into account score losses (`.against`)
   * TieBreaker positions are now demoted before it is done
   * Many other TieBreaker results improvements
+  * Constructor changes, now groupSize is a key in options
+  * Default `groupSize` now initialized to `numPlayers` so basic use is a league
 
 0.3.0 / 2013-10-25
 ==================

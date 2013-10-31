@@ -3,11 +3,13 @@ var tap = require('tap')
   , GroupStage = require('../');
 
 test("group stage 6 3 uefa", function (t) {
-  var gs = new GroupStage(6, 3);
+  var opts = { groupSize: 3 };
+  var gs = new GroupStage(6, opts);
 
   t.equal(gs.findMatches({s:1}).length, 3, '3 matches per group');
 
-  var uefa = new GroupStage(6, 3, { meetTwice: true });
+  opts.meetTwice = true;
+  var uefa = new GroupStage(6, opts);
   t.equal(uefa.findMatches({s:1}).length, 6, '6 matches per group');
 
   uefa.matches.forEach(function (m) {

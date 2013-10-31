@@ -11,7 +11,7 @@ var mapEven = function (n) {
   return n*2;
 };
 
-var groupStage = function (numPlayers, groupSize, hasAway) {
+var makeMatches = function (numPlayers, groupSize, hasAway) {
   var ms = grouper(numPlayers, groupSize);
 
   var matches = [];
@@ -37,37 +37,39 @@ var groupStage = function (numPlayers, groupSize, hasAway) {
   return matches.sort(Base.compareMatches);
 };
 
-var GroupStage = Base.sub('GroupStage', ['numPlayers', 'groupSize', 'opts'], {
-  init: function (initParent) {
-    this.version = 1;
-    this.meetTwice = Boolean((this.opts || {}).meetTwice);
-    delete this.opts;
-    var ms = groupStage(this.numPlayers, this.groupSize, this.meetTwice);
-    this.numGroups = $.maximum(ms.map($.get('id', 's')));
-    this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // NB: is minimal
-    initParent(ms);
+var GroupStage = Base.sub('GroupStage', function (opts, initParent) {
+  var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice);
+  this.numGroups = $.maximum(ms.map($.get('id', 's')));
+  this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // perhaps reduced
+  initParent(ms);
+});
+
+GroupStage.configure({
+  defaults: function (np, opts) {
+    opts.groupSize = opts.groupSize || np; // no group size => league
+    opts.meetTwice = !!opts.meetTwice;
+    return opts;
+  },
+
+  invalid: function (np, opts) {
+    if (!Base.isInteger(opts.groupSize)) {
+      return "groupSize must only be specified as a finite integer";
+    }
+    if (np < 3) {
+      return "GroupStage needs at least 3 players";
+    }
+    if (opts.groupSize < 3) {
+      return "GroupStage needs a group size greater than or equal 3";
+    }
+    if (opts.groupSize > np) {
+      return "cannot create GroupStage with groupSize > numPlayers";
+    }
+    return null;
   }
-  // NB: no propagation to do, no extra unscorable rules
 });
 
 GroupStage.idString = function (id) {
   return "G" + id.s + " R" + id.r + " M" + id.m;
-};
-
-GroupStage.invalid = function (np, gs) {
-  if (!Base.isInteger(np) || !Base.isInteger(gs)) {
-    return "numPlayers and groupSize must be finite integers";
-  }
-  if (np < 3) {
-    return "GroupStage needs at least 3 players";
-  }
-  if (gs < 3) {
-    return "GroupStage needs a group size greater than or equal 3";
-  }
-  if (gs > np) {
-    return "cannot create GroupStage with groupSize > numPlayers";
-  }
-  return null;
 };
 
 // helper
@@ -101,7 +103,6 @@ const defaultResOpts = {
 
 GroupStage.prototype.stats = function (res, opts) {
   var cfg = $.extend(Object.create(defaultResOpts), opts || {});
-  var np = this.numPlayers;
 
   // compute stats based on completed matches
   this.matches.filter($.get('m')).forEach(function (m) {
