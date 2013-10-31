@@ -16,11 +16,14 @@ By combining a group stage with a later elimination round, the best players get 
 Specify the number of players and the group size.
 
 ```js
+// 6 players in a single group
+var gs = new GroupStage(6);
+
 // 16 players in groups of 4
-var gs1 = new GroupStage(16, 4);
+var gs1 = new GroupStage(16, { groupSize: 4 });
 
 // 9 players in groups of 3
-var gs2 = new GroupStage(9, 3);
+var gs2 = new GroupStage(9, { groupSize: 3 });
 ```
 
 The `GroupStage.invalid(numPlayers, groupSize)` will tell you whether the constructor arguments produce a valid tournament. Read its entry in the [tournament commonalities doc](https://github.com/clux/tournament/blob/master/doc/base.md#ensuring-constructibility) for info on this.

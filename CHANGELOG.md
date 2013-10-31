@@ -1,10 +1,12 @@
-0.4.0 / 2013-10-XX
+0.4.0 / 2013-10-31
 ==================
+  * Use tournament@0.18.0 interface
   * GroupStage sorting now takes into account score losses (`.against`)
   * TieBreaker positions are now demoted before it is done
   * Many other TieBreaker results improvements
   * Constructor changes, now groupSize is a key in options
   * Default `groupSize` now initialized to `numPlayers` so basic use is a league
+  * NB: TieBreaker will still change massively - its tests still fail
 
 0.3.0 / 2013-10-25
 ==================
