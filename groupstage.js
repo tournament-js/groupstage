@@ -50,7 +50,7 @@ var GroupStage = Base.sub('GroupStage', function (opts, initParent) {
 GroupStage.configure({
   defaults: function (np, opts) {
     // no group size set => league
-    opts.groupSize = Number.isFinite(opts.groupSize) ? opts.groupSize : np;
+    opts.groupSize = Number(opts.groupSize) || np;
     opts.meetTwice = Boolean(opts.meetTwice);
     opts.winPoints = Number.isFinite(opts.winPoints) ? opts.winPoints : 3;
     opts.tiePoints = Number.isFinite(opts.tiePoints) ? opts.tiePoints : 1;
