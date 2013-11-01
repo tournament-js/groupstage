@@ -1,3 +1,7 @@
+0.5.0 / 2013-11-XX
+==================
+  * tiebreaker factored into its own module and fundamentally changed therein
+
 0.4.0 / 2013-10-31
 ==================
   * Use tournament@0.18.0 interface
