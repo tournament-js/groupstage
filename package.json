@@ -15,7 +15,7 @@
   ],
   "main": "groupstage.js",
   "scripts": {
-    "test": "tap test/gs.*"
+    "test": "tap test/*.js"
   },
   "dependencies": {
     "interlude": "~1.0.2",
