@@ -12,11 +12,10 @@ var mapEven = function (n) {
 };
 
 var makeMatches = function (numPlayers, groupSize, hasAway) {
-  var ms = grouper(numPlayers, groupSize);
-
+  var groups = grouper(numPlayers, groupSize);
   var matches = [];
-  for (var g = 0; g < ms.length; g += 1) {
-    var group = ms[g];
+  for (var g = 0; g < groups.length; g += 1) {
+    var group = groups[g];
     // make robin rounds for the group
     var rnds = robin(group.length, group);
     for (var r = 0; r < rnds.length; r += 1) {
