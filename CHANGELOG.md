@@ -1,6 +1,7 @@
-0.5.0 / 2013-11-XX
+0.5.0 / 2013-11-02
 ==================
   * tiebreaker factored into its own module and fundamentally changed therein
+  * Interface with tournament@0.19.0 for multi stage support
 
 0.4.0 / 2013-10-31
 ==================
