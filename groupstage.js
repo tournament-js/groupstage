@@ -104,26 +104,26 @@ GroupStage.prototype.initResult = function (seed) {
 GroupStage.prototype.stats = function (res) {
   // compute stats based on completed matches
   this.matches.filter($.get('m')).forEach(function (m) {
-    var p0 = m.p[0] - 1
-      , p1 = m.p[1] - 1;
+    var p0 = Base.resultEntry(res, m.p[0]);
+    var p1 = Base.resultEntry(res, m.p[1]);
 
     if (m.m[0] === m.m[1]) {
-      res[p0].pts += this.tiePoints;
-      res[p1].pts += this.tiePoints;
-      res[p0].draws += 1;
-      res[p1].draws += 1;
+      p0.pts += this.tiePoints;
+      p1.pts += this.tiePoints;
+      p0.draws += 1;
+      p1.draws += 1;
     }
     else {
       var w = (m.m[0] > m.m[1]) ? p0 : p1;
       var l = (m.m[0] > m.m[1]) ? p1 : p0;
-      res[w].wins += 1;
-      res[w].pts += this.winPoints;
-      res[l].losses += 1;
+      w.wins += 1;
+      w.pts += this.winPoints;
+      l.losses += 1;
     }
-    res[p0].for += m.m[0];
-    res[p1].for += m.m[1];
-    res[p0].against += m.m[1];
-    res[p1].against += m.m[0];
+    p0.for += m.m[0];
+    p1.for += m.m[1];
+    p0.against += m.m[1];
+    p1.against += m.m[0];
   }.bind(this));
 
   var scoresBreak = this.scoresBreak;
