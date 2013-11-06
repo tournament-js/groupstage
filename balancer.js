@@ -5,15 +5,13 @@ exports.tieCompute = function (ary, startPos, scoreBreak, cb) {
   var pos = startPos
     , ties = 0
     , pts = -Infinity
-    , scoreDiff = -Infinity
-    , tbScore = -Infinity;
+    , scoreDiff = -Infinity;
   for (var i = 0; i < ary.length; i += 1) {
     var r = ary[i]
       , samePts = (r.pts === pts)
-      , sameDiff = (scoreDiff === (r.for - r.against))
-      , sameTbScore = (r.tb == null || tbScore === r.tb);
+      , sameDiff = (scoreDiff === (r.for - (r.against || 0)));
 
-    if (samePts && (!scoreBreak || sameDiff) && sameTbScore) {
+    if (samePts && (!scoreBreak || sameDiff)) {
       ties += 1;
     }
     else {
@@ -22,7 +20,6 @@ exports.tieCompute = function (ary, startPos, scoreBreak, cb) {
     }
     pts = r.pts;
     scoreDiff = r.for - r.against;
-    tbScore = r.tb;
     cb(r, pos, i); // so we can do something with pos on r
   }
 };

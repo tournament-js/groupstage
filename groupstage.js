@@ -88,7 +88,7 @@ GroupStage.prototype.groupFor = function (playerId) {
   }
 };
 
-GroupStage.prototype.initResult = function (seed) {
+GroupStage.prototype._initResult = function (seed) {
   return {
     grp: this.groupFor(seed),
     gpos: this.groupSize,
@@ -101,31 +101,34 @@ GroupStage.prototype.initResult = function (seed) {
   };
 };
 
-GroupStage.prototype.stats = function (res) {
-  // compute stats based on completed matches
-  this.matches.filter($.get('m')).forEach(function (m) {
-    var p0 = Base.resultEntry(res, m.p[0]);
-    var p1 = Base.resultEntry(res, m.p[1]);
+GroupStage.prototype._stats = function (res, m) {
+  if (!m.m) {
+    return res;
+  }
+  var p0 = Base.resultEntry(res, m.p[0]);
+  var p1 = Base.resultEntry(res, m.p[1]);
 
-    if (m.m[0] === m.m[1]) {
-      p0.pts += this.tiePoints;
-      p1.pts += this.tiePoints;
-      p0.draws += 1;
-      p1.draws += 1;
-    }
-    else {
-      var w = (m.m[0] > m.m[1]) ? p0 : p1;
-      var l = (m.m[0] > m.m[1]) ? p1 : p0;
-      w.wins += 1;
-      w.pts += this.winPoints;
-      l.losses += 1;
-    }
-    p0.for += m.m[0];
-    p1.for += m.m[1];
-    p0.against += m.m[1];
-    p1.against += m.m[0];
-  }.bind(this));
+  if (m.m[0] === m.m[1]) {
+    p0.pts += this.tiePoints;
+    p1.pts += this.tiePoints;
+    p0.draws += 1;
+    p1.draws += 1;
+  }
+  else {
+    var w = (m.m[0] > m.m[1]) ? p0 : p1;
+    var l = (m.m[0] > m.m[1]) ? p1 : p0;
+    w.wins += 1;
+    w.pts += this.winPoints;
+    l.losses += 1;
+  }
+  p0.for += m.m[0];
+  p1.for += m.m[1];
+  p0.against += m.m[1];
+  p1.against += m.m[0];
+  return res;
+}
 
+GroupStage.prototype._sort = function (res) {
   var scoresBreak = this.scoresBreak;
   res.sort(algs.compareResults(scoresBreak));
   var grps = algs.resultsByGroup(res, this.numGroups);

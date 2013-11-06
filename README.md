@@ -1,7 +1,6 @@
 # GroupStage
 [![Build Status](https://secure.travis-ci.org/clux/groupstage.png)](http://travis-ci.org/clux/groupstage)
 [![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage)
-[![Code Climate](https://codeclimate.com/github/clux/groupstage.png)](https://codeclimate.com/github/clux/groupstage)
 
     Stability: 2 - Unstable
 
