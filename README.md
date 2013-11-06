@@ -89,7 +89,7 @@ Unlike any other tournament `GroupStage` can compute results in a variable manne
 ```
 
 #### Tiebreaking
-But in some cases, even this is insufficient. For this you need to forward the `gs.results()` to a [`TieBreaker` tournament](./tiebreaker.md). This tournament can also be used as a test of whether or not tiebreaking is needed.
+But in some cases, even this is insufficient. For this you need to forward to a [`TieBreaker` tournament](https://npmjs.org/package/tiebreaker). This module can also be used as a test of whether or not tiebreaking is needed.
 
 ### Seeding and groups
 Like for most other tournaments, seeding is important. The initial player partitioning into groups is done in such a way so that there is a variety of differently skilled players:
