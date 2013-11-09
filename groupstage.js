@@ -126,7 +126,7 @@ GroupStage.prototype._stats = function (res, m) {
   p0.against += m.m[1];
   p1.against += m.m[0];
   return res;
-}
+};
 
 GroupStage.prototype._sort = function (res) {
   var scoresBreak = this.scoresBreak;
@@ -149,6 +149,20 @@ GroupStage.prototype._sort = function (res) {
     algs.positionFromXarys(xarys, scoresBreak); // position iff done
   }
   return res.sort(algs.finalCompare); // ensure sorted by pos primarily
+};
+
+
+// helper method to be compatible with TieBreaker
+GroupStage.prototype.rawPositions = function (res) {
+  return algs.resultsByGroup(res, this.numGroups).map(function (grp) {
+    // NB: need to create the empty arrays to let result function as a lookup
+    var seedAry = $.replicate(grp.length, []);
+    for (var k = 0; k < grp.length; k += 1) {
+      var p = grp[k];
+      $.insert(seedAry[p.gpos-1], p.seed); // insert ensures ascending order
+    }
+    return seedAry;
+  });
 };
 
 module.exports = GroupStage;
