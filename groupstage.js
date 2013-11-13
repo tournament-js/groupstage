@@ -1,8 +1,7 @@
 var $ = require('interlude')
   , Base = require('tournament')
   , robin = require('roundrobin')
-  , grouper = require('group')
-  , algs = require('./balancer');
+  , grouper = require('group');
 
 var mapOdd = function (n) {
   return n*2 - 1;
@@ -128,33 +127,73 @@ GroupStage.prototype._stats = function (res, m) {
   return res;
 };
 
+var resultsByGroup = function (results, numGroups) {
+  var grps = $.replicate(numGroups, []);
+  for (var k = 0; k < results.length; k += 1) {
+    var p = results[k];
+    grps[p.grp - 1].push(p);
+  }
+  return grps;
+};
+
+var tieCompute = function (resAry, startPos, scoresBreak, cb) {
+  // provide the metric for resTieCompute which look factors: points and score diff
+  Base.resTieCompute(resAry, startPos, cb, function metric(r) {
+    var val = "PTS" + r.pts;
+    if (scoresBreak) {
+      val += "DIFF" + (r.for - (r.against || 0));
+    }
+    return val;
+  });
+};
+
+var compareResults = function (x, y) {
+  if (x.pts !== y.pts) {
+    return y.pts - x.pts;
+  }
+  var scoreDiff = ((y.for - y.against) - (x.for - x.against));
+  return scoreDiff || (x.seed - y.seed);
+};
+
+var finalCompare = function (x, y) {
+  if (x.pos !== y.pos) {
+    return x.pos - y.pos;
+  }
+  return compareResults(x, y);
+};
+
 GroupStage.prototype._sort = function (res) {
   var scoresBreak = this.scoresBreak;
-  res.sort(algs.compareResults(scoresBreak));
-  var grps = algs.resultsByGroup(res, this.numGroups);
+  res.sort(compareResults);
+  var grps = resultsByGroup(res, this.numGroups);
 
   // tieCompute within groups to get the `gpos` attribute
   // at the same time build up array of xplacers
   var xarys = $.replicate(this.groupSize, []);
   grps.forEach(function (g) { // g sorted as res is
-    algs.tieCompute(g, 0, scoresBreak, function (r, pos) {
+    tieCompute(g, 0, scoresBreak, function (r, pos) {
       r.gpos = pos;
       xarys[pos-1].push(r);
     });
   });
 
-  // tieCompute across groups via xplacers to get the `pos` attribute
-  // also push into the final sorted results as we go along (so we preserve orders)
-  if (this.isDone()) {
-    algs.positionFromXarys(xarys, scoresBreak); // position iff done
-  }
-  return res.sort(algs.finalCompare); // ensure sorted by pos primarily
-};
 
+  if (this.isDone()) {
+    // position based entirely on x-placement (ignore pts/scorediff across grps)
+    var posctr = 1;
+    xarys.forEach(function (xplacers) {
+      xplacers.forEach(function (r) {
+        r.pos = posctr;
+      });
+      posctr += xplacers.length;
+    });
+  }
+  return res.sort(finalCompare); // ensure sorted by pos primarily
+};
 
 // helper method to be compatible with TieBreaker
 GroupStage.prototype.rawPositions = function (res) {
-  return algs.resultsByGroup(res, this.numGroups).map(function (grp) {
+  return resultsByGroup(res, this.numGroups).map(function (grp) {
     // NB: need to create the empty arrays to let result function as a lookup
     var seedAry = $.replicate(grp.length, []);
     for (var k = 0; k < grp.length; k += 1) {
