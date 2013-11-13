@@ -1,3 +1,8 @@
+0.6.0 / 2013-11-13
+==================
+  * We no longer break up positions between groups - 1st placers are always tied 1st out of this module (only TieBreakers can break between groups)
+  * Interface with tournament@0.20.2 for cleaner results implementation
+
 0.5.1 / 2013-11-06
 ==================
   * Interface with tournament@0.20.0 for cleaner results implementation
