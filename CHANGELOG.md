@@ -1,3 +1,7 @@
+0.6.1 / 2013-11-13
+==================
+  * fix broken release (0.6.0 fails to install)
+
 0.6.0 / 2013-11-13
 ==================
   * We no longer break up positions between groups - 1st placers are always tied 1st out of this module (only TieBreakers can break between groups)
