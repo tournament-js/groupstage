@@ -1,3 +1,7 @@
+0.6.2 / 2013-11-24
+==================
+  * allow 2 player groupstages (needed for grouped tiebreakers)
+
 0.6.1 / 2013-11-13
 ==================
   * fix broken release (0.6.0 fails to install)

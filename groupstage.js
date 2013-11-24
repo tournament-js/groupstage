@@ -60,11 +60,11 @@ GroupStage.configure({
     if (!Base.isInteger(opts.groupSize)) {
       return "groupSize must only be specified as a finite integer";
     }
-    if (np < 3) {
-      return "GroupStage needs at least 3 players";
+    if (np < 2) {
+      return "GroupStage needs at least 2 players";
     }
-    if (opts.groupSize < 3) {
-      return "GroupStage needs a group size greater than or equal 3";
+    if (opts.groupSize < 2) {
+      return "GroupStage needs a group size greater than or equal 2";
     }
     if (opts.groupSize > np) {
       return "cannot create GroupStage with groupSize > numPlayers";
@@ -141,42 +141,35 @@ var tieCompute = function (resAry, startPos, scoresBreak, cb) {
   Base.resTieCompute(resAry, startPos, cb, function metric(r) {
     var val = "PTS" + r.pts;
     if (scoresBreak) {
-      val += "DIFF" + (r.for - (r.against || 0));
+      val += "DIFF" + (r.for - r.against);
     }
     return val;
   });
 };
 
 var compareResults = function (x, y) {
-  if (x.pts !== y.pts) {
-    return y.pts - x.pts;
-  }
-  var scoreDiff = ((y.for - y.against) - (x.for - x.against));
-  return scoreDiff || (x.seed - y.seed);
+  var xScore = x.for - x.against;
+  var yScore = y.for - y.against;
+  return (y.pts - x.pts) || (yScore - xScore) || (x.seed - y.seed);
 };
 
 var finalCompare = function (x, y) {
-  if (x.pos !== y.pos) {
-    return x.pos - y.pos;
-  }
-  return compareResults(x, y);
+  return (x.pos - y.pos) ||  compareResults(x, y);
 };
 
 GroupStage.prototype._sort = function (res) {
   var scoresBreak = this.scoresBreak;
   res.sort(compareResults);
-  var grps = resultsByGroup(res, this.numGroups);
 
   // tieCompute within groups to get the `gpos` attribute
   // at the same time build up array of xplacers
   var xarys = $.replicate(this.groupSize, []);
-  grps.forEach(function (g) { // g sorted as res is
+  resultsByGroup(res, this.numGroups).forEach(function (g) { // g sorted as res is
     tieCompute(g, 0, scoresBreak, function (r, pos) {
       r.gpos = pos;
       xarys[pos-1].push(r);
     });
   });
-
 
   if (this.isDone()) {
     // position based entirely on x-placement (ignore pts/scorediff across grps)
