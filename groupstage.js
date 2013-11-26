@@ -1,5 +1,5 @@
 var $ = require('interlude')
-  , Base = require('tournament')
+  , Tournament = require('tournament')
   , robin = require('roundrobin')
   , grouper = require('group');
 
@@ -32,10 +32,10 @@ var makeMatches = function (numPlayers, groupSize, hasAway) {
       }
     }
   }
-  return matches.sort(Base.compareMatches);
+  return matches.sort(Tournament.compareMatches);
 };
 
-var GroupStage = Base.sub('GroupStage', function (opts, initParent) {
+var GroupStage = Tournament.sub('GroupStage', function (opts, initParent) {
   var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice);
   this.numGroups = $.maximum(ms.map($.get('id', 's')));
   this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // perhaps reduced
@@ -57,7 +57,7 @@ GroupStage.configure({
   },
 
   invalid: function (np, opts) {
-    if (!Base.isInteger(opts.groupSize)) {
+    if (!Tournament.isInteger(opts.groupSize)) {
       return "groupSize must only be specified as a finite integer";
     }
     if (np < 2) {
@@ -92,9 +92,6 @@ GroupStage.prototype._initResult = function (seed) {
     grp: this.groupFor(seed),
     gpos: this.groupSize,
     pts: 0,
-    for: 0,
-    against: 0,
-    wins: 0,
     draws: 0,
     losses: 0
   };
@@ -104,8 +101,8 @@ GroupStage.prototype._stats = function (res, m) {
   if (!m.m) {
     return res;
   }
-  var p0 = Base.resultEntry(res, m.p[0]);
-  var p1 = Base.resultEntry(res, m.p[1]);
+  var p0 = Tournament.resultEntry(res, m.p[0]);
+  var p1 = Tournament.resultEntry(res, m.p[1]);
 
   if (m.m[0] === m.m[1]) {
     p0.pts += this.tiePoints;
@@ -138,7 +135,7 @@ var resultsByGroup = function (results, numGroups) {
 
 var tieCompute = function (resAry, startPos, scoresBreak, cb) {
   // provide the metric for resTieCompute which look factors: points and score diff
-  Base.resTieCompute(resAry, startPos, cb, function metric(r) {
+  Tournament.resTieCompute(resAry, startPos, cb, function metric(r) {
     var val = "PTS" + r.pts;
     if (scoresBreak) {
       val += "DIFF" + (r.for - r.against);
