@@ -1,7 +1,7 @@
 # GroupStage
 [![Build Status](https://secure.travis-ci.org/clux/groupstage.png)](http://travis-ci.org/clux/groupstage)
 [![Dependency Status](https://david-dm.org/clux/groupstage.png)](https://david-dm.org/clux/groupstage)
-[![stable](http://hughsk.github.io/stability-badges/dist/stable.svg)](http://nodejs.org/api/documentation.html#documentation_stability_index)
+[![unstable](http://hughsk.github.io/stability-badges/dist/unstable.svg)](http://nodejs.org/api/documentation.html#documentation_stability_index)
 
 ## Overview
 GroupStage is a simple and customizable, early stage [tournament](https://npmjs.org/package/tournament). A group stage is designed to pick out the best players by first splitting them up in fair groups of requested size, then round robin schedule each group.
@@ -66,7 +66,7 @@ The `GroupStage.invalid()` will tell you whether the constructor arguments produ
 GroupStage is a [tournament](https://npmjs.org/package/tournament) - to get the most out of this module you should read (at least) the following:
 
 - [ensuring constructibility](https://github.com/clux/tournament/blob/master/doc/base.md#ensuring-constructibility)
-- [common methods](https://github.com/clux/tournament/blob/master/doc/base.md#common-methods)
+- [base class](https://github.com/clux/tournament/blob/master/doc/base.md#base-class)
 - [scoring](https://github.com/clux/tournament/blob/master/doc/base.md#ensuring-scorability--consistency)
 
 ## Special methods
@@ -100,7 +100,7 @@ Thus, the following conventions are enforced:
 
 - Before `.isDone()`, all players have a tied `.pos` attribute at numPlayers
 - After `.isDone()`, we tie all the players who got 1st in each group at 1st, then all players who got 2nd at (numFirsts+1), then so on
-- Ties need to be broken [outside this module](https://npmjs.org/package/tiebreaker) to guarwantee fair progression
+- Ties need to be broken [outside this module](https://npmjs.org/package/tiebreaker) to guarantee fair progression
 
 Finally,
 

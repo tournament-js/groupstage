@@ -1,3 +1,7 @@
+0.6.3 / 2013-12-11
+==================
+  * documentation mistakes fixed
+
 0.6.2 / 2013-11-24
 ==================
   * allow 2 player groupstages (needed for grouped tiebreakers)
