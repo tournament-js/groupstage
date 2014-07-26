@@ -1,3 +1,7 @@
+0.7.1 / 2014-07-26
+==================
+  * Documentation and coverage release
+
 0.7.0 / 2013-12-23
 ==================
   * Updated `tournament` to 0.21.0 so that `GroupStage` is an `EventEmitter`
