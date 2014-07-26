@@ -1,10 +1,8 @@
-var tap = require('tap')
-  , test = tap.test
-  , $ = require('interlude')
-  , GroupStage = require('../groupstage')
+var $ = require('interlude')
+  , GroupStage = require(process.env.GROUPSTAGE_COV ? '../groupstage-cov.js' : '../')
   , rep = GroupStage.idString;
 
-test("group stage 10 6 serialize", function (t) {
+exports.serializeA = function (t) {
   var opts = { groupSize: 6 };
   t.equal(GroupStage.invalid(10, opts), null, "can construct a 10 6 group stage");
   var gs = new GroupStage(10, opts);
@@ -20,11 +18,11 @@ test("group stage 10 6 serialize", function (t) {
     t.ok(gs2.score(g.id, [1,0]), "should be able to score all these matches");
   });
 
-  t.end();
-});
+  t.done();
+};
 
 
-test("group stage 16 4 serialize", function (t) {
+exports.serializeB = function (t) {
   var opts = { groupSize: 4 };
   var gs = new GroupStage(16, opts);
   var gs2 = GroupStage.parse(gs + '');
@@ -37,11 +35,11 @@ test("group stage 16 4 serialize", function (t) {
     t.ok(gs2.score(g.id, [1,0]), "should be able to score all these matches");
   });
 
-  t.end();
-});
+  t.done();
+};
 
 // couple of tests to ensure correct lengths
-test("group stage 16 4", function (t) {
+exports.standardSixteenFour = function (t) {
   var opts = { groupSize: 4 };
   t.equal(GroupStage.invalid(16, opts), null, "can construct a 16 4 group stage");
   var gs = new GroupStage(16, opts)
@@ -56,10 +54,10 @@ test("group stage 16 4", function (t) {
 
   t.equal(ms.length, 4*(3*2), "4x3 rounds of (4/2) matches in total");
 
-  t.end();
-});
+  t.done();
+};
 
-test("group stage 32 8", function (t) {
+exports.standardThirtytwoEight = function (t) {
   var opts = { groupSize: 8 };
   t.equal(GroupStage.invalid(32, opts), null, "can construct a 32 8 group stage");
   var gs = new GroupStage(32, opts)
@@ -103,11 +101,11 @@ test("group stage 32 8", function (t) {
     t.equal(r.pts, 5*3, "all 3rd placers won 5 matches");
   });
 
-  t.end();
-});
+  t.done();
+};
 
 
-test("group stage 50 10", function (t) {
+exports.standardFiftyTen = function (t) {
   var opts = { groupSize: 10 };
   t.equal(GroupStage.invalid(50, opts), null, "can construct a 50 10 group stage");
   var gs = new GroupStage(50, opts)
@@ -121,10 +119,10 @@ test("group stage 50 10", function (t) {
 
   t.equal(ms.length, 5*9*5, "5x9 rounds of (10/2) matches in total");
 
-  t.end();
-});
+  t.done();
+};
 
-test("upcoming 6 3", function (t) {
+exports.upcomingSix = function (t) {
   var opts = { groupSize: 3 };
   var g = new GroupStage(6, opts);
   // grps == [1,3,6] + [2,4,5]
@@ -142,11 +140,11 @@ test("upcoming 6 3", function (t) {
     t.ok(!m.m, "given match was not scored");
   });
 
-  t.end();
-});
+  t.done();
+};
 
 
-test("upcoming/scorable 16 8", function (t) {
+exports.upcomingSixteenEight = function (t) {
   var opts = { groupSize: 4 };
   t.equal(GroupStage.invalid(16, opts), null, "can construct a 16 4 group stage");
   var g = new GroupStage(16, opts)
@@ -203,8 +201,8 @@ test("upcoming/scorable 16 8", function (t) {
     t.equal(g.unscorable(m.id, [1,0], true), null, "unless we rewrite history" + id);
   });
 
-  t.end();
-});
+  t.done();
+};
 
 var makeStr = function(r) {
   var str = r.pos + " P" + r.seed + " W=" + r.wins;
@@ -215,7 +213,7 @@ var makeStr = function(r) {
   return str;
 };
 
-test("res test 9 3", function (t) {
+exports.resultsNineThree = function (t) {
   var score = function (g, r) {
     g.matches.forEach(function (m) {
       // g.id.s is unique amongst x-placers and sufficient for never-tieing prop.
@@ -292,5 +290,5 @@ test("res test 9 3", function (t) {
     t.equal(r.pts, 3*r.wins, "pts are 3x wins (when no draws)");
   });
 
-  t.end();
-});
+  t.done();
+};

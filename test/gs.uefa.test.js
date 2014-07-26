@@ -1,19 +1,17 @@
-var tap = require('tap')
-  , test = tap.test
-  , GroupStage = require('../');
+var GS = require(process.env.GROUPSTAGE_COV ? '../groupstage-cov.js' : '../');
 
-test("group stage 6 3 uefa", function (t) {
+exports.uefa = function (t) {
   var opts = { groupSize: 3, scoresBreak: true };
-  var gs = new GroupStage(6, opts);
+  var gs = new GS(6, opts);
 
   t.equal(gs.findMatches({s:1}).length, 3, '3 matches per group');
 
   opts.meetTwice = true;
-  var uefa = new GroupStage(6, opts);
+  var uefa = new GS(6, opts);
   t.equal(uefa.findMatches({s:1}).length, 6, '6 matches per group');
 
   uefa.matches.forEach(function (m) {
-    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]));
+    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]), 'score');
   });
   // score st groups decided unanimously based on seeds:
   // thus: group 1: [1, 3, 6],, group 2: [2, 4, 5]
@@ -36,5 +34,5 @@ test("group stage 6 3 uefa", function (t) {
   ];
   t.deepEqual(res, expected, "results");
 
-  t.end();
-});
+  t.done();
+};
