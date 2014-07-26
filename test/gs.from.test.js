@@ -1,9 +1,7 @@
-var tap = require('tap')
-  , test = tap.test
-  , $ = require('interlude')
+var $ = require('interlude')
   , GS = require('../');
 
-test("GS -> GS -> GS", function (t) {
+exports.GStoGS = function (t) {
   var g1 = new GS(16, { groupSize: 4 });
   g1.matches.forEach(function (m) {
     g1.score(m.id, m.p[0] < m.p[1] ? [0,1] : [1,0]); // reverse seed order
@@ -30,5 +28,5 @@ test("GS -> GS -> GS", function (t) {
   var g3 = GS.from(g2, 4);
   t.deepEqual(g3.players(), [9,10,11,12], "top 4 progressed to g3");
 
-  t.end();
-});
+  t.done();
+};
