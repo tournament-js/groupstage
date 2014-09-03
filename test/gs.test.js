@@ -1,6 +1,6 @@
 var $ = require('interlude')
   , GroupStage = require(process.env.GROUPSTAGE_COV ? '../groupstage-cov.js' : '../')
-  , rep = GroupStage.idString;
+  ;
 
 exports.serializeA = function (t) {
   var opts = { groupSize: 6 };
@@ -181,8 +181,8 @@ exports.upcomingSixteenEight = function (t) {
 
     $.range(4).forEach(function (s) { // all 4 groups
       $.range(2).forEach(function (m) { // all 2 matches per group (in this round)
-        var id = {s: s, r: r, m: m};
-        t.equal(g.unscorable(id, [1,0]), null, "can score " + rep(id));
+        var id = GroupStage.id(s, r, m);
+        t.equal(g.unscorable(id, [1,0]), null, "can score " + id);
         t.ok(g.score(id, [1, 0]), "scoring round" + r);
       });
     });
@@ -196,9 +196,8 @@ exports.upcomingSixteenEight = function (t) {
 
   // ensure that nothing is now scorable
   ms.forEach(function (m) {
-    var id = rep(m.id);
-    t.ok(g.unscorable(m.id, [1,0]), "no matches are now scorable" + id);
-    t.equal(g.unscorable(m.id, [1,0], true), null, "unless we rewrite history" + id);
+    t.ok(g.unscorable(m.id, [1,0]), "no matches are now scorable" + m.id);
+    t.equal(g.unscorable(m.id, [1,0], true), null, "unless rewrite history" + m.id);
   });
 
   t.done();
@@ -221,8 +220,8 @@ exports.resultsNineThree = function (t) {
       var b = (m.id.s === 2) ? a-2 : a-1;
       if (m.id.r === r) {
         var score = m.p[0] < m.p[1] ? [a,b] : [b,a]; // always 1 diff
-        t.equal(g.unscorable(m.id, [a,a-1]), null, rep(m.id) + " !unscorable");
-        t.ok(g.score(m.id, score), "score " + rep(m.id));
+        t.equal(g.unscorable(m.id, [a,a-1]), null, m.id + " !unscorable");
+        t.ok(g.score(m.id, score), "score " + m.id);
       }
     });
   };

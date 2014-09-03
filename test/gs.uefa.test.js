@@ -11,7 +11,7 @@ exports.uefa = function (t) {
   t.equal(uefa.findMatches({s:1}).length, 6, '6 matches per group');
 
   uefa.matches.forEach(function (m) {
-    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]), 'score');
+    t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]), 'score ' + m.id);
   });
   // score st groups decided unanimously based on seeds:
   // thus: group 1: [1, 3, 6],, group 2: [2, 4, 5]

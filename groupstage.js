@@ -3,6 +3,19 @@ var $ = require('interlude')
   , robin = require('roundrobin')
   , grouper = require('group');
 
+function Id(g, r, m) {
+  if (!(this instanceof Id)) {
+    return new Id(g, r, m);
+  }
+  this.s = g;
+  this.r = r;
+  this.m = m;
+}
+
+Id.prototype.toString = function () {
+  return "G" + this.s + " R" + this.r + " M" + this.m;
+};
+
 var mapOdd = function (n) {
   return n*2 - 1;
 };
@@ -22,12 +35,12 @@ var makeMatches = function (numPlayers, groupSize, hasAway) {
       for (var m = 0; m < rnd.length; m += 1) {
         var plsH = rnd[m];
         if (!hasAway) { // players only meet once
-          matches.push({ id: { s: g+1, r: r+1, m: m+1 }, p : plsH });
+          matches.push({ id: new Id(g+1, r+1, m+1), p : plsH });
         }
         else { // players meet twice
           var plsA = plsH.slice().reverse();
-          matches.push({ id: { s: g+1, r: mapOdd(r+1),  m: m+1 }, p: plsH });
-          matches.push({ id: { s: g+1, r: mapEven(r+1), m: m+1 }, p: plsA });
+          matches.push({ id: new Id(g+1, mapOdd(r+1), m+1), p: plsH });
+          matches.push({ id: new Id(g+1, mapEven(r+1), m+1), p: plsA });
         }
       }
     }
@@ -72,10 +85,6 @@ GroupStage.configure({
     return null;
   }
 });
-
-GroupStage.idString = function (id) {
-  return "G" + id.s + " R" + id.r + " M" + id.m;
-};
 
 // helper
 GroupStage.prototype.groupFor = function (playerId) {
@@ -193,5 +202,7 @@ GroupStage.prototype.rawPositions = function (res) {
     return seedAry;
   });
 };
+
+GroupStage.id = Id; // mostly for tests
 
 module.exports = GroupStage;
