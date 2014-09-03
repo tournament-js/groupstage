@@ -2,7 +2,7 @@
   "name": "groupstage",
   "description": "Group stage tournament",
   "author": "Eirik Albrigtsen <analsandblaster@gmail.com>",
-  "version": "0.7.1",
+  "version": "1.0.0",
   "stability": "unstable",
   "repository": {
     "type": "git",
