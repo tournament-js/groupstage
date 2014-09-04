@@ -1,3 +1,7 @@
+1.0.1 / 2014-09-04
+==================
+  * GroupStage.defaults no longer modifies input
+
 1.0.0 / 2014-09-03
 ==================
   * Remove `idString` but provide a `toString` function for match ids natively
