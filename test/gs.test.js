@@ -129,13 +129,13 @@ exports.upcomingSix = function (t) {
   $.range(6).forEach(function (n) {
     var up = g.upcoming(n);
 
-    t.ok(up, "found upcoming match for " + n);
-    t.equal(up.m, 1, "3p grps => 1 match per round");
+    t.ok(up.length, "found upcoming match for " + n);
+    t.equal(up[0].id.m, 1, "3p grps => 1 match per round");
     // had group sizes all been even we would verify .r === 1
-    t.ok([1, 2].indexOf(up.r) >= 0, "playing at least in one of the first rounds");
+    t.ok([1, 2].indexOf(up[0].id.r) >= 0, "playing in one of the first rounds");
 
     // now verify that n exists in the match and that it's unscored
-    var m = g.findMatch(up);
+    var m = g.findMatch(up[0].id);
     t.ok(m.p.indexOf(n) >= 0, "player " + n + " exists in .p");
     t.ok(!m.m, "given match was not scored");
   });
@@ -155,14 +155,14 @@ exports.upcomingSixteenEight = function (t) {
     $.range(16).forEach(function (n) {
       var up = g.upcoming(n);
 
-      t.ok(up, "found upcoming match for " + n);
-      t.equal(g.unscorable(up, [1, 0]), null, "given id is scorable");
+      t.ok(up.length, "found upcoming match for " + n);
+      t.equal(g.unscorable(up[0].id, [1, 0]), null, "given id is scorable");
 
-      // up.r follow loop as everyone plays in each round when group sizes even
-      t.equal(up.r, r, "previous round scored all now wait for round" + r);
+      // up[0].id.r follow loop as everyone plays in each round when group sizes even
+      t.equal(up[0].id.r, r, "previous round scored all now wait for round" + r);
 
       // now verify that n exists in the match and that it's unscored
-      var m = g.findMatch(up);
+      var m = g.findMatch(up[0].id);
       t.ok(m.p.indexOf(n) >= 0, "player " + n + " exists in .p");
       t.ok(!m.m, "given match was not scored");
     });
@@ -191,7 +191,7 @@ exports.upcomingSixteenEight = function (t) {
 
   $.range(16).forEach(function (n) {
     var up = g.upcoming(n);
-    t.ok(!up, "no more upcoming matches after 3 rounds played");
+    t.ok(!up.length, "no more upcoming matches after 3 rounds played");
   });
 
   // ensure that nothing is now scorable
