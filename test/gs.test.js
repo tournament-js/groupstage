@@ -2,6 +2,14 @@ var $ = require('interlude')
   , GroupStage = require(process.env.GROUPSTAGE_COV ? '../groupstage-cov.js' : '../')
   ;
 
+exports.invalid = function (t) {
+  var inv = GroupStage.invalid;
+  t.equal(inv(1), "numPlayers cannot be less than 2", 'np limit');
+  t.equal(inv(3, { groupSize: 1 }), "groupSize cannot be less than 2");
+  t.equal(inv(3, { groupSize: 4 }),  "groupSize cannot be greater than numPlayers");
+  t.done();
+};
+
 exports.serializeA = function (t) {
   var opts = { groupSize: 6 };
   t.equal(GroupStage.invalid(10, opts), null, "can construct a 10 6 group stage");

@@ -72,16 +72,16 @@ GroupStage.configure({
 
   invalid: function (np, opts) {
     if (!Tournament.isInteger(opts.groupSize)) {
-      return "groupSize must only be specified as a finite integer";
+      return "groupSize must be a finite integer if set";
     }
     if (np < 2) {
-      return "GroupStage needs at least 2 players";
+      return "numPlayers cannot be less than 2";
     }
     if (opts.groupSize < 2) {
-      return "GroupStage needs a group size greater than or equal 2";
+      return "groupSize cannot be less than 2";
     }
     if (opts.groupSize > np) {
-      return "cannot create GroupStage with groupSize > numPlayers";
+      return "groupSize cannot be greater than numPlayers";
     }
     return null;
   }
