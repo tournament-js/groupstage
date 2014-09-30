@@ -21,10 +21,10 @@
     "coveralls": "npm run coverage | coveralls"
   },
   "dependencies": {
-    "interlude": "^1.0.2",
+    "interlude": "^1.1.0",
     "roundrobin": "^1.0.2",
     "group": "^0.2.1",
-    "tournament": "^2.0.0"
+    "tournament": "^2.0.1"
   },
   "devDependencies": {
     "coveralls": "^2.11.1",
