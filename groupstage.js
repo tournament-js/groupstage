@@ -94,6 +94,9 @@ GroupStage.prototype.groupFor = function (playerId) {
   }
 };
 
+// no one-round-at-a-time restrictions so can always recore
+GroupStage.prototype._safe = $.constant(true);
+
 GroupStage.prototype._initResult = function (seed) {
   return {
     grp: this.groupFor(seed),

@@ -179,11 +179,9 @@ exports.upcomingSixteenEight = function (t) {
     ms.forEach(function (m) {
       if (m.id.r >= r) {
         t.equal(g.unscorable(m.id, [1,0]), null, "unplayed matches scorable");
-        t.equal(g.unscorable(m.id, [1,0], true), null, "also when rewriting..");
       }
       else if (m.id.r < r) {
-        t.ok(g.unscorable(m.id, [1,0]), "nothing is scorable in the past");
-        t.equal(g.unscorable(m.id, [1,0], true), null, "except when rewriting");
+        t.equal(g.unscorable(m.id, [1,0]), null, "still scorable in the past");
       }
     });
 
@@ -204,8 +202,7 @@ exports.upcomingSixteenEight = function (t) {
 
   // ensure that nothing is now scorable
   ms.forEach(function (m) {
-    t.ok(g.unscorable(m.id, [1,0]), "no matches are now scorable" + m.id);
-    t.equal(g.unscorable(m.id, [1,0], true), null, "unless rewrite history" + m.id);
+    t.equal(g.unscorable(m.id, [1,0]), null, m.id + " still scorable");
   });
 
   t.done();
