@@ -59,14 +59,13 @@ var GroupStage = Tournament.sub('GroupStage', function (opts, initParent) {
 });
 
 GroupStage.configure({
-  defaults: function (np, opts) {
+  defaults: function (np, o) {
     // no group size set => league
-    var o = {};
-    o.groupSize = Number(opts.groupSize) || np;
-    o.meetTwice = Boolean(opts.meetTwice);
-    o.winPoints = Number.isFinite(opts.winPoints) ? opts.winPoints : 3;
-    o.tiePoints = Number.isFinite(opts.tiePoints) ? opts.tiePoints : 1;
-    o.scoresBreak = Boolean(opts.scoresBreak);
+    o.groupSize = Number(o.groupSize) || np;
+    o.meetTwice = Boolean(o.meetTwice);
+    o.winPoints = Number.isFinite(o.winPoints) ? o.winPoints : 3;
+    o.tiePoints = Number.isFinite(o.tiePoints) ? o.tiePoints : 1;
+    o.scoresBreak = Boolean(o.scoresBreak);
     return o;
   },
 
