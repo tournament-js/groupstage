@@ -10,42 +10,6 @@ exports.invalid = function (t) {
   t.done();
 };
 
-exports.serializeA = function (t) {
-  var opts = { groupSize: 6 };
-  t.equal(GroupStage.invalid(10, opts), null, "can construct a 10 6 group stage");
-  var gs = new GroupStage(10, opts);
-  var gs2 = GroupStage.parse(gs + '');
-
-  t.equal(gs.groupSize, 5, "group size reduced to as insufficient players");
-
-  t.deepEqual(gs.matches, gs2.matches, "matches same");
-  t.equal(gs.groupSize, gs2.groupSize, "groupSize recalculated correctly");
-  t.equal(gs.numPlayers, gs2.numPlayers, "numPlayers kept correctly");
-
-  gs2.matches.forEach(function (g) {
-    t.ok(gs2.score(g.id, [1,0]), "should be able to score all these matches");
-  });
-
-  t.done();
-};
-
-
-exports.serializeB = function (t) {
-  var opts = { groupSize: 4 };
-  var gs = new GroupStage(16, opts);
-  var gs2 = GroupStage.parse(gs + '');
-
-  t.deepEqual(gs.matches, gs2.matches, "matches same");
-  t.equal(gs.groupSize, gs2.groupSize, "groupSize recalculated correctly");
-  t.equal(gs.numPlayers, gs2.numPlayers, "numPlayers kept correctly");
-
-  gs2.matches.forEach(function (g) {
-    t.ok(gs2.score(g.id, [1,0]), "should be able to score all these matches");
-  });
-
-  t.done();
-};
-
 // couple of tests to ensure correct lengths
 exports.standardSixteenFour = function (t) {
   var opts = { groupSize: 4 };
