@@ -1,31 +1,31 @@
 var $ = require('interlude')
-  , GroupStage = require(process.env.GROUPSTAGE_COV ? '../groupstage-cov.js' : '../')
-  ;
+  , GroupStage = require('..')
+  , test = require('bandage');
 
-exports.fullTiedGroupRawPositions = function (t) {
+
+test('fullTiedGroupRawPositions', function *(t) {
   var gs = new GroupStage(9, { groupSize: 3 });
   var ms = gs.matches;
 
   // score so that everyone got exactly one win
   // easy to do by symmetry in this case, reverse score middle match in group
-  ms.forEach(function (m){
+  ms.forEach(function (m) {
     gs.score(m.id, (m.id.r === 2) ? [0, 1] : [1, 0]);
   });
 
   var res = gs.results();
 
-  t.deepEqual($.nub($.pluck('wins', res)), [1], "all players won 1 match");
-  t.deepEqual($.nub($.pluck('pos', res)), [1], "all players tied for 1st");
-  t.deepEqual(gs.rawPositions(res), [
-      [ [1,4,9], [], [] ], // group 1
-      [ [2,5,8], [], [] ], // group 2
-      [ [3,6,7], [], [] ]  // group 3
-    ], "raw positions shows all tied 1st in group"
+  t.eq($.nub($.pluck('wins', res)), [1], 'all players won 1 match');
+  t.eq($.nub($.pluck('pos', res)), [1], 'all players tied for 1st');
+  t.eq(gs.rawPositions(res), [
+    [ [1,4,9], [], [] ], // group 1
+    [ [2,5,8], [], [] ], // group 2
+    [ [3,6,7], [], [] ] ], // group 3
+    'raw positions shows all tied 1st in group'
   );
-  t.done();
-};
+});
 
-exports.threeWayTie = function (t) {
+test('threeWayTie', function *(t) {
   var gs = new GroupStage(8, { groupSize: 4 });
 
   gs.matches.forEach(function (m) {
@@ -37,16 +37,14 @@ exports.threeWayTie = function (t) {
     }
   });
 
-  t.deepEqual(gs.rawPositions(gs.results()), [
-      [ [3], [1,6,8], [], [] ], // three way tie g1
-      [ [4,5,7], [], [], [2] ]  // three way tie g2
-    ], "three way tie properly computed"
+  t.eq(gs.rawPositions(gs.results()), [
+    [ [3], [1,6,8], [], [] ], // three way tie g1
+    [ [4,5,7], [], [], [2] ] ], // three way tie g2
+    'three way tie properly computed'
   );
+});
 
-  t.done();
-};
-
-exports.tieResult = function (t) {
+test('tieResult', function *(t) {
   var gs = new GroupStage(8, { groupSize: 4 });
 
   gs.matches.forEach(function (m) {
@@ -65,15 +63,12 @@ exports.tieResult = function (t) {
   var g2 = res.filter(function (r) {
     return r.grp === 2;
   });
-  t.deepEqual($.pluck('pts', g1), [3,3,3,3], "all players tied 3 matches in g1");
-  t.deepEqual($.pluck('pts', g2), [9,6,3,0], "straight point spread in g2");
+  t.eq($.pluck('pts', g1), [3,3,3,3], 'all players tied 3 matches in g1');
+  t.eq($.pluck('pts', g2), [9,6,3,0], 'straight point spread in g2');
 
-
-  t.deepEqual(gs.rawPositions(res), [
-      [ [1,3,6,8], [], [], [] ], // full tied g1
-      [ [2], [4], [5], [7] ]     // no ties in g2
-    ], "full ties group is correct"
+  t.eq(gs.rawPositions(res), [
+    [ [1,3,6,8], [], [], [] ], // full tied g1
+    [ [2], [4], [5], [7] ] ],  // no ties in g2
+    'full ties group is correct'
   );
-
-  t.done();
-};
+});
