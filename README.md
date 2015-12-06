@@ -3,7 +3,6 @@
 [![build status](https://secure.travis-ci.org/clux/groupstage.svg)](http://travis-ci.org/clux/groupstage)
 [![dependency status](https://david-dm.org/clux/groupstage.svg)](https://david-dm.org/clux/groupstage)
 [![coverage status](http://img.shields.io/coveralls/clux/groupstage.svg)](https://coveralls.io/r/clux/groupstage)
-[![stable](http://img.shields.io/badge/stability-stable-74C614.svg)](http://nodejs.org/api/documentation.html#documentation_stability_index)
 
 ## Overview
 GroupStage is a simple and customizable, early stage [tournament](https://npmjs.org/package/tournament). A group stage is designed to pick out the best players by first splitting them up in fair groups of requested size, then round robin schedule each group.
