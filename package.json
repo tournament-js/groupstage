@@ -15,8 +15,9 @@
   ],
   "main": "groupstage.js",
   "scripts": {
-    "test": "nodeunit test/*.js --reporter=verbose",
-    "coverage": "jscoverage groupstage.js && GROUPSTAGE_COV=1 nodeunit --reporter=lcov test"
+    "test": "bndg test/*.js",
+    "precoverage": "istanbul cover bndg test/*.test.js",
+    "coverage": "cat coverage/lcov.info && rm -rf coverage"
   },
   "dependencies": {
     "interlude": "^1.1.0",
