@@ -13,8 +13,10 @@ function Id(g, r, m) {
 }
 
 Id.prototype.toString = function () {
-  return "G" + this.s + " R" + this.r + " M" + this.m;
+  return 'G' + this.s + ' R' + this.r + ' M' + this.m;
 };
+
+// ------------------------------------------------------------------
 
 var mapOdd = function (n) {
   return n*2 - 1;
@@ -48,6 +50,8 @@ var makeMatches = function (numPlayers, groupSize, hasAway) {
   return matches.sort(Tournament.compareMatches);
 };
 
+// ------------------------------------------------------------------
+
 var GroupStage = Tournament.sub('GroupStage', function (opts, initParent) {
   var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice);
   this.numGroups = $.maximum(ms.map($.get('id', 's')));
@@ -71,13 +75,13 @@ GroupStage.configure({
 
   invalid: function (np, opts) {
     if (np < 2) {
-      return "numPlayers cannot be less than 2";
+      return 'numPlayers cannot be less than 2';
     }
     if (opts.groupSize < 2) {
-      return "groupSize cannot be less than 2";
+      return 'groupSize cannot be less than 2';
     }
     if (opts.groupSize > np) {
-      return "groupSize cannot be greater than numPlayers";
+      return 'groupSize cannot be greater than numPlayers';
     }
     return null;
   }
@@ -145,9 +149,9 @@ var resultsByGroup = function (results, numGroups) {
 var tieCompute = function (resAry, startPos, scoresBreak, cb) {
   // provide the metric for resTieCompute which look factors: points and score diff
   Tournament.resTieCompute(resAry, startPos, cb, function metric(r) {
-    var val = "PTS" + r.pts;
+    var val = 'PTS' + r.pts;
     if (scoresBreak) {
-      val += "DIFF" + (r.for - r.against);
+      val += 'DIFF' + (r.for - r.against);
     }
     return val;
   });
@@ -203,6 +207,6 @@ GroupStage.prototype.rawPositions = function (res) {
   });
 };
 
-GroupStage.id = Id; // mostly for tests
+// ------------------------------------------------------------------
 
 module.exports = GroupStage;
