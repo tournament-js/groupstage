@@ -1,3 +1,8 @@
+3.1.1 / 2015-12-16
+==================
+  * Expose `.Id` class as `.Id`
+  * Deprecate `.id` - classes should be capitalized
+
 3.1.0 / 2015-12-06
 ==================
   * Bump tournament@3.1.0 for configurable logs

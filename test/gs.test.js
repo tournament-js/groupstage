@@ -141,7 +141,7 @@ test('upcomingSixteenEight', function *(t) {
 
     $.range(4).forEach(function (s) { // all 4 groups
       $.range(2).forEach(function (m) { // all 2 matches per group (in this round)
-        var id = GroupStage.id(s, r, m);
+        var id = new GroupStage.Id(s, r, m);
         t.eq(g.unscorable(id, [1,0]), null, 'can score ' + id);
         t.ok(g.score(id, [1, 0]), 'scoring round' + r);
       });

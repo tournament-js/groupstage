@@ -209,4 +209,6 @@ GroupStage.prototype.rawPositions = function (res) {
 
 // ------------------------------------------------------------------
 
+GroupStage.id = Id; // deprecated - should be capitalized
+GroupStage.Id = Id;
 module.exports = GroupStage;
