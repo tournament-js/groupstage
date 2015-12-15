@@ -2,7 +2,7 @@
   "name": "groupstage",
   "description": "Group stage tournament",
   "author": "Eirik Albrigtsen <analsandblaster@gmail.com>",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "repository": {
     "type": "git",
     "url": "clux/groupstage"
