@@ -25,13 +25,14 @@ var mapEven = function (n) {
   return n*2;
 };
 
-var makeMatches = function (numPlayers, groupSize, hasAway) {
+var makeMatches = function (numPlayers, groupSize, hasAway, numberOfDuels) {
   var groups = grouper(numPlayers, groupSize);
   var matches = [];
   for (var g = 0; g < groups.length; g += 1) {
     var group = groups[g];
     // make robin rounds for the group
     var rnds = robin(group.length, group);
+    console.log('ESTO QUE ES', hasAway, rnds, rnds.length);
     for (var r = 0; r < rnds.length; r += 1) {
       var rnd = rnds[r];
       for (var m = 0; m < rnd.length; m += 1) {
@@ -41,19 +42,26 @@ var makeMatches = function (numPlayers, groupSize, hasAway) {
         }
         else { // players meet twice
           var plsA = plsH.slice().reverse();
-          matches.push({ id: new Id(g+1, mapOdd(r+1), m+1), p: plsH });
-          matches.push({ id: new Id(g+1, mapEven(r+1), m+1), p: plsA });
+          matches.push({ id: new Id(g+1, r+1, m+1), p: plsH });
+          matches.push({ id: new Id(g+1, r+1+rnds.length, m+1), p: plsA });
+          if (numberOfDuels > 2) {
+            for (var d = 2; d < numberOfDuels; d++) {
+              var aPls = d % 2 === 0 ? plsH : plsA;
+              matches.push({ id: new Id(g+1, r+1+(rnds.length * d), m+1), p: aPls });
+            }
+          }
         }
       }
     }
   }
+  console.log(matches);  
   return matches.sort(Tournament.compareMatches);
 };
 
 // ------------------------------------------------------------------
 
 var GroupStage = Tournament.sub('GroupStage', function (opts, initParent) {
-  var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice);
+  var ms = makeMatches(this.numPlayers, opts.groupSize, opts.meetTwice, opts.numberOfDuels);
   this.numGroups = $.maximum(ms.map($.get('id', 's')));
   this.groupSize = Math.ceil(this.numPlayers / this.numGroups); // perhaps reduced
   this.winPoints = opts.winPoints;
@@ -67,6 +75,7 @@ GroupStage.configure({
     // no group size set => league
     o.groupSize = Number(o.groupSize) || np;
     o.meetTwice = Boolean(o.meetTwice);
+    o.numberOfDuels = Number(o.numberOfDuels);
     o.winPoints = Number.isFinite(o.winPoints) ? o.winPoints : 3;
     o.tiePoints = Number.isFinite(o.tiePoints) ? o.tiePoints : 1;
     o.scoresBreak = Boolean(o.scoresBreak);

@@ -15,7 +15,7 @@
   ],
   "main": "groupstage.js",
   "scripts": {
-    "test": "bndg test/*.js",
+    "test": "bndg test/gs.uefa.test.js",
     "precoverage": "istanbul cover bndg test/*.test.js",
     "coverage": "cat coverage/lcov.info && rm -rf coverage"
   },

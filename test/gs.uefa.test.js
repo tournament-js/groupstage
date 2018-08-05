@@ -8,12 +8,19 @@ test('uefa', function *(t) {
   t.eq(gs.findMatches({s: 1}).length, 3, '3 matches per group');
 
   opts.meetTwice = true;
+  opts.numberOfDuels = 3;
+  var uefa = new GS(6, opts);
+  t.eq(uefa.findMatches({s: 1}).length, 9, '9 matches per group');
+
+  opts.numberOfDuels = 2;
   var uefa = new GS(6, opts);
   t.eq(uefa.findMatches({s: 1}).length, 6, '6 matches per group');
 
   uefa.matches.forEach(function (m) {
     t.ok(uefa.score(m.id, m.p[0] < m.p[1] ? [2,1] : [1, 2]), 'score ' + m.id);
   });
+
+  
   // score st groups decided unanimously based on seeds:
   // thus: group 1: [1, 3, 6],, group 2: [2, 4, 5]
   // no tiebreaking, so xplacers: [[1,2], [], [3, 4], [], [5, 6], []]
