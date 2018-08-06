@@ -32,7 +32,6 @@ var makeMatches = function (numPlayers, groupSize, hasAway, numberOfDuels) {
     var group = groups[g];
     // make robin rounds for the group
     var rnds = robin(group.length, group);
-    console.log('ESTO QUE ES', hasAway, rnds, rnds.length);
     for (var r = 0; r < rnds.length; r += 1) {
       var rnd = rnds[r];
       for (var m = 0; m < rnd.length; m += 1) {
@@ -54,7 +53,6 @@ var makeMatches = function (numPlayers, groupSize, hasAway, numberOfDuels) {
       }
     }
   }
-  console.log(matches);  
   return matches.sort(Tournament.compareMatches);
 };
 
